@@ -53,7 +53,7 @@ public class StatusManager : IStatusLogicHook
         var predation = Instance.PredationStatus.Status;
         if (Instance.WildManager.IsWild(card, s, c) && s.ship.Get(predation) > 0) {
             c.Queue(new AAttack {
-                damage = s.ship.Get(predation)
+                damage = card.GetDmg(s, s.ship.Get(predation))
             });
         }
     }
