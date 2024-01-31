@@ -202,21 +202,17 @@ public sealed class ModEntry : SimpleMod {
 			}
 		});
 
-		// helper.Content.Characters.RegisterCharacterAnimation("GameOver", new()
-		// {
-		// 	Deck = PeachesDeck.Deck,
-		// 	LoopTag = "gameover",
-		// 	Frames = Enumerable.Range(0, 1)
-		// 		.Select(i => helper.Content.Sprites.RegisterSprite(package.PackageRoot.GetRelativeFile($"Sprites/character/GameOver/{i}.png")).Sprite)
-		// 		.ToList()
-		// });
-		// helper.Content.Characters.RegisterCharacterAnimation("Squint", new()
-		// {
-		// 	Deck = PeachesDeck.Deck,
-		// 	LoopTag = "squint",
-		// 	Frames = Enumerable.Range(0, 5)
-		// 		.Select(i => helper.Content.Sprites.RegisterSprite(package.PackageRoot.GetRelativeFile($"Sprites/character/Squint/{i}.png")).Sprite)
-		// 		.ToList()
-		// });
+		helper.Content.Characters.RegisterCharacterAnimation("GameOver", new()
+		{
+			Deck = TyDeck.Deck,
+			LoopTag = "gameover",
+			Frames = [TyPortrait.Sprite]
+		});
+		helper.Content.Characters.RegisterCharacterAnimation("Squint", new()
+		{
+			Deck = TyDeck.Deck,
+			LoopTag = "squint",
+			Frames = [TyPortrait.Sprite]
+		});
     }
 }
