@@ -363,7 +363,7 @@ internal sealed class PotShotCard : Card, IWildCard, ITyCard
 	{
 		Upgrade.B => [
 			new AAttack {
-				damage = 3
+				damage = GetDmg(s, 3)
 			},
 			new ADrawCard {
 				count = 1
@@ -371,7 +371,7 @@ internal sealed class PotShotCard : Card, IWildCard, ITyCard
 		],
 		_ => [
 			new AAttack {
-				damage = upgrade == Upgrade.A ? 4 : 3
+				damage = GetDmg(s, upgrade == Upgrade.A ? 4 : 3)
 			},
 		]
 	};
@@ -409,17 +409,17 @@ internal sealed class StackCard : Card, ITyCard
 		return upgrade switch
 		{
 			Upgrade.B => [
-				new AVariableHint {
-					status = Status.shield
-				},
 				new AStatus {
 					status = Status.shield,
 					statusAmount = 1,
 					targetPlayer = true
 				},
+				new AVariableHint {
+					status = Status.shield
+				},
 				new AStatus {
 					status = Status.tempShield,
-					statusAmount = GetX(s),
+					statusAmount = GetX(s) + 1,
 					targetPlayer = true,
 					xHint = 1
 				},
@@ -809,15 +809,15 @@ internal sealed class CurlUpCard : Card, IWildCard, ITyCard
 		var amt = ModEntry.Instance.WildManager.CountWildsInHand(s, c);
 		return upgrade switch {
 			Upgrade.A => [
-				new AVariableHintWild(),
 				new AStatus {
 					status = ModEntry.Instance.XFactorStatus.Status,
 					statusAmount = 1,
 					targetPlayer = true
 				},
+				new AVariableHintWild(),
 				new AStatus {
 					status = Status.shield,
-					statusAmount = amt,
+					statusAmount = amt + 1,
 					targetPlayer = true,
 					xHint = 1
 				},
@@ -842,15 +842,15 @@ internal sealed class CurlUpCard : Card, IWildCard, ITyCard
 				}
 			],
 			_ => [
-				new AVariableHintWild(),
 				new AStatus {
 					status = ModEntry.Instance.XFactorStatus.Status,
 					statusAmount = 1,
 					targetPlayer = true
 				},
+				new AVariableHintWild(),
 				new AStatus {
 					status = Status.shield,
-					statusAmount = amt,
+					statusAmount = amt + 1,
 					targetPlayer = true,
 					xHint = 1
 				}
