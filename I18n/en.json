@@ -1,0 +1,163 @@
+{
+    "character": {
+        "name": "Ty & Sasha",
+        "description": [
+            "<c=CB2867>TY & SASHA</c>",
+            "Your zoologist. Studies animals like his pet, Sasha, to learn new battle strategies. Specializes in <c=keyword>X values</c> and <c=keyword>wild cards</c>, which have self-synergy."
+        ]
+    },
+    "trait": {
+        "wild": {
+            "name": "Wild",
+            "description": "Enables wild card synergy."
+        }
+    },
+    "action": {
+        "variableHintWild": {
+            "description": "X = Wild cards in hand{{Amount}}."
+        },
+        "variableHintEnergy": {
+            "description": "X = Your energy after paying this card's cost{{Amount}}."
+        },
+        "variableHintNumber": {
+            "description": "X = <c=keyword>{{Amount}}</c>."
+        },
+        "makeWild": {
+            "name": "make wild",
+            "description": "Make a card <c=cardtrait>wild</c> {{Duration}}.",
+            "cardSelectText": {
+                "forever": "Select a card to add <c=cardtrait>wild</c> to, forever.\n(<c=cardtrait>Wild</c> cards power up other wild cards!)",
+                "temp": "Select a card to add <c=cardtrait>wild</c> to for the rest of combat.\n(<c=cardtrait>Wild</c> cards power up other wild cards!)"
+            },
+            "showCardText": "Added <c=cardtrait>wild</c>!"
+        },
+        "makeWildAndBuoyant": {
+            "name": "make wild and buoyant",
+            "description": "Make a card <c=cardtrait>wild</c> and <c=cardtrait>buoyant</c> {{Duration}}.",
+            "cardSelectText": {
+                "forever": "Select a card to add <c=cardtrait>wild</c> and <c=cardtrait>buoyant</c> to, forever.\n(<c=cardtrait>Wild</c> cards power each other up, <c=cardtrait>buoyant</c> cards are always drawn first!)",
+                "temp": "Select a card to add <c=cardtrait>wild</c> to for the rest of combat and <c=cardtrait>buoyant</c> to forever.\n(<c=cardtrait>Wild</c> cards power each other up, <c=cardtrait>buoyant</c> cards are always drawn first!)"
+            },
+            "showCardText": "Added <c=cardtrait>wild</c> and <c=cardtrait>buoyant</c>!"
+        },
+        "energySet": {
+            "description": "Set your energy to <c=keyword>{{Amount}}</c>."
+        }
+    },
+    "status": {
+        "XFactor": {
+            "name": "X Factor",
+            "description": "Increase the value of X on all cards by <c=keyword>{0}</c>. <c=downside>Decreases by 1 at the end of the turn.",
+            "descriptionAlt": "Increase the value of X on all cards by <c=keyword>{Amount}</c>. <c=downside>Decreases by 1 at the end of the turn."
+        },
+        "ExtremeMeasures": {
+            "name": "Extreme Measures",
+            "description": "Increase the value of X on all cards by <c=keyword>{0}</c>."
+        },
+        "Predation": {
+            "name": "Predation",
+            "description": "After a <c=cardtrait>wild</c> card is played, attack for <c=keyword>{0}</c> damage."
+        }
+    },
+    "artifact": {
+        "Lycanthropy": {
+            "name": "LYCANTHROPY",
+            "description": "Choose 2 cards that are not <c=cardtrait>wild</c> in your deck. They become wild."
+        },
+        "NaturalTalent": {
+            "name": "NATURAL TALENT",
+            "description": "Choose a card that is not both <c=cardtrait>wild</c> and <c=cardtrait>buoyant</c> in your deck. It becomes <c=cardtrait>wild</c> and <c=cardtrait>buoyant</c>."
+        },
+        "ChewToy": {
+            "name": "CHEW TOY",
+            "description": "On your first turn, gain 2 <c=status>X FACTOR</c>."
+        },
+        "BabyStarnacle": {
+            "name": "BABY STARNACLE",
+            "description": "Draw <c=card>+1 card</c> every turn during elite and boss fights."
+        },
+        "ScratchingPost": {
+            "name": "SCRATCHING POST",
+            "description": "The first <c=cardtrait>wild</c> card played each turn does +1 damage."
+        },
+        "GenomeSplicing": {
+            "name": "GENOME SPLICING",
+            "description": "Cards with an X value have it increased by the number of <c=cardtrait>wild</c> cards in your hand if they didn't already."
+        }
+    },
+    "card": {
+        "Adrenaline": {
+            "name": "Adrenaline"
+        },
+        "AugmentDNA": {
+            "name": "Augment DNA",
+            "description": {
+                "None": "Choose a card in <c=keyword>hand</c>. It becomes <c=cardtrait>wild</c> for the rest of combat.",
+                "A": "Choose 2 cards in <c=keyword>hand</c>. They become <c=cardtrait>wild</c> for the rest of combat.",
+                "B": "Choose 3 cards in <c=keyword>hand</c>. They become <c=cardtrait>wild</c> for the rest of combat."
+            }
+        },
+        "Bite": {
+            "name": "Bite"
+        },
+        "Compound": {
+            "name": "Compound"
+        },
+        "CrossAttack": {
+            "name": "Cross Attack"
+        },
+        "CurlUp": {
+            "name": "Curl-up"
+        },
+        "Diverter": {
+            "name": "Diverter"
+        },
+        "ExtremeMeasures": {
+            "name": "Extreme Measures"
+        },
+        "Fetch": {
+            "name": "Fetch",
+            "description": {
+                "None": "Choose 2 <c=cardtrait>wild</c> cards in your <c=keyword>draw pile</c>. Put them in your hand.",
+                "A": "Choose 3 <c=cardtrait>wild</c> cards in your <c=keyword>draw pile</c>. Put them in your hand.",
+                "B": "Choose a <c=cardtrait>wild</c> card in your <c=keyword>draw pile</c>. Put it in your hand."
+            }
+        },
+        "Hibernate": {
+            "name": "Hibernate"
+        },
+        "Hugs": {
+            "name": "Hugs"
+        },
+        "Instincts": {
+            "name": "Instincts"
+        },
+        "PatOnTheBack": {
+            "name": "Pat on the Back"
+        },
+        "PotShot": {
+            "name": "Pot Shot"
+        },
+        "Pounce": {
+            "name": "Pounce"
+        },
+        "Predation": {
+            "name": "Predation"
+        },
+        "Scratch": {
+            "name": "Stratch"
+        },
+        "Scurry": {
+            "name": "Scurry"
+        },
+        "Stack": {
+            "name": "Stack"
+        },
+        "Treat": {
+            "name": "Treat"
+        },
+        "Zoomies": {
+            "name": "Zoomies"
+        }
+    }
+}
