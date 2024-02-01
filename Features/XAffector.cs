@@ -68,6 +68,8 @@ public class XAffectorManager
             status.statusAmount += xBonus;
         } else if (action is ADrawCard draw) {
             draw.count += xBonus;
+        } else if (action is AEnergy energy) {
+            energy.changeAmount += xBonus;
         } else if (action is AAddCard add) {
             add.amount += xBonus;
         } else if (action is ADiscard discard) {
@@ -175,7 +177,7 @@ public class XAffectorManager
                 Rect? rect = new Rect(w + 1);
                 Vec xy = g.Push(null, rect).rect.xy;
                 Spr? plus = StableSpr.icons_plus;
-                Color? trueColor = (action.disabled ? spriteColor : Colors.textMain);
+                Color? trueColor = action.disabled ? spriteColor : Colors.textMain;
                 Draw.Sprite(plus, xy.x, xy.y, flipX: false, flipY: false, 0.0, null, null, null, null, trueColor);
                 g.Pop();
             }
@@ -187,11 +189,11 @@ public class XAffectorManager
             {
                 Rect? rect = new Rect(w - 1);
                 Vec xy = g.Push(null, rect).rect.xy;
-                Color textColor = (action.disabled ? Colors.disabledText : Colors.textMain);;
+                Color textColor = action.disabled ? Colors.disabledText : Colors.textMain;;
                 Draw.Text(value + "", xy.x, xy.y + 2, null, textColor, null, null, null, null, dontDraw: false, null, spriteColor, null, null, null, dontSubstituteLocFont: true);
                 g.Pop();
             }
-            w += iconWidth - 5;
+            w += (iconWidth - 5) * (int)Math.Max(1, Math.Ceiling(Math.Log10(value+1)));
         }
         return w;
     }
