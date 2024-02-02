@@ -499,7 +499,7 @@ internal sealed class CrossAttackCard : Card, ITyCard
 
 	public int GetX(State s)
 	{
-		return s.ship.Get(upgrade == Upgrade.A ? ModEntry.Instance.XFactorStatus.Status : Status.shield);
+		return s.ship.Get(upgrade == Upgrade.None ? Status.shield : ModEntry.Instance.XFactorStatus.Status);
 	}
 
 	public override List<CardAction> GetActions(State s, Combat c)
@@ -516,7 +516,7 @@ internal sealed class CrossAttackCard : Card, ITyCard
 					targetPlayer = true
 				},
 				new AAttack {
-					damage = GetDmg(s, GetX(s)),
+					damage = GetDmg(s, GetX(s) + 1),
 					xHint = 1
 				},
 			],
@@ -530,7 +530,7 @@ internal sealed class CrossAttackCard : Card, ITyCard
 					targetPlayer = true
 				},
 				new AAttack {
-					damage = GetDmg(s, GetX(s)),
+					damage = GetDmg(s, GetX(s) + 2),
 					xHint = 1
 				},
 			],
@@ -544,9 +544,8 @@ internal sealed class CrossAttackCard : Card, ITyCard
 				},
 				new AStatus {
 					status = ModEntry.Instance.XFactorStatus.Status,
-					statusAmount = GetX(s),
-					targetPlayer = true,
-					xHint = 1
+					statusAmount = 1,
+					targetPlayer = true
 				},
 			]
 		};
