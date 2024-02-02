@@ -18,6 +18,7 @@ public sealed class ModEntry : SimpleMod {
 
     internal Harmony Harmony { get; }
 	internal IKokoroApi KokoroApi { get; }
+	internal IMoreDifficultiesApi MoreDifficultiesApi { get; }
 
 	internal WildManager WildManager { get; }
 
@@ -101,6 +102,7 @@ public sealed class ModEntry : SimpleMod {
 	{
 		Instance = this;
 		Harmony = new(package.Manifest.UniqueName);
+		MoreDifficultiesApi = helper.ModRegistry.GetApi<IMoreDifficultiesApi>("TheJazMaster.MoreDifficulties")!;
 		KokoroApi = helper.ModRegistry.GetApi<IKokoroApi>("Shockah.Kokoro")!;
 		KokoroApi.RegisterTypeForExtensionData(typeof(Part));
 
@@ -176,7 +178,12 @@ public sealed class ModEntry : SimpleMod {
 		foreach (var artifactType in AllArtifactTypes)
 			AccessTools.DeclaredMethod(artifactType, nameof(ITyCard.Register))?.Invoke(null, [helper]);
 
-
+		MoreDifficultiesApi?.RegisterAltStarters(TyDeck.Deck, new StarterDeck {
+            cards = {
+                new PatOnTheBackCard(),
+                new ZoomiesCard()
+            }
+        });
 
         TyCharacter = helper.Content.Characters.RegisterCharacter("TyAndSasha", new()
 		{
