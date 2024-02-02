@@ -25,24 +25,61 @@ internal sealed class TreatCard : Card, ITyCard
 	}
 
 	public override CardData GetData(State state) => new() {
-		cost = 1,
+		cost = upgrade == Upgrade.B ? 2 : 1,
 		artTint = "ffffff"
 	};
 
-	public override List<CardAction> GetActions(State s, Combat c) => [
-		new AStatus
-		{
-			status = upgrade == Upgrade.B ? Status.tempShield : Status.shield,
-			statusAmount = upgrade == Upgrade.A ? 2 : 1,
-			targetPlayer = true
-		},
-		new AStatus
-		{
-			status = ModEntry.Instance.XFactorStatus.Status,
-			statusAmount = upgrade == Upgrade.B ? 2 : 1,
-			targetPlayer = true
-		}
-	];
+	public override List<CardAction> GetActions(State s, Combat c) => upgrade switch
+	{
+		Upgrade.A => [
+			new AStatus
+			{
+				status = Status.shield,
+				statusAmount = 2,
+				targetPlayer = true
+			},
+			new AStatus
+			{
+				status = ModEntry.Instance.XFactorStatus.Status,
+				statusAmount = 1,
+				targetPlayer = true
+			}
+		],
+		Upgrade.B => [
+			new AStatus
+			{
+				status = Status.shield,
+				statusAmount = 1,
+				targetPlayer = true
+			},
+			new AStatus
+			{
+				status = Status.tempShield,
+				statusAmount = 1,
+				targetPlayer = true
+			},
+			new AStatus
+			{
+				status = ModEntry.Instance.XFactorStatus.Status,
+				statusAmount = 2,
+				targetPlayer = true
+			}
+		],
+		_ => [
+			new AStatus
+			{
+				status = Status.shield,
+				statusAmount = 1,
+				targetPlayer = true
+			},
+			new AStatus
+			{
+				status = ModEntry.Instance.XFactorStatus.Status,
+				statusAmount = 1,
+				targetPlayer = true
+			}
+		],
+	};
 }
 
 
@@ -257,9 +294,9 @@ internal sealed class HugsCard : Card, ITyCard
 	}
 
 	public override CardData GetData(State state) => new() {
-		cost = upgrade == Upgrade.B ? 0 : 1,
+		cost = 1,
 		retain = upgrade == Upgrade.A,
-		exhaust = upgrade == Upgrade.B,
+		exhaust = upgrade != Upgrade.B,
 		artTint = "ffffff"
 	};
 
@@ -267,7 +304,7 @@ internal sealed class HugsCard : Card, ITyCard
 		new AStatus
 		{
 			status = ModEntry.Instance.XFactorStatus.Status,
-			statusAmount = upgrade == Upgrade.B ? 3 : 2,
+			statusAmount = 2,
 			targetPlayer = true
 		}
 	];
@@ -457,7 +494,8 @@ internal sealed class PatOnTheBackCard : Card, ITyCard
 	}
 
 	public override CardData GetData(State state) => new() {
-		cost = 1,
+		cost = upgrade == Upgrade.B ? 0 : 1,
+		exhaust = upgrade == Upgrade.B,
 		artTint = "ffffff"
 	};
 
@@ -1021,7 +1059,7 @@ internal sealed class DiverterCard : Card, ITyCard
 	}
 
 	public override CardData GetData(State state) => new() {
-		cost = 1,
+		cost = 2,
 		artTint = "ffffff"
 	};
 
@@ -1049,9 +1087,9 @@ internal sealed class DiverterCard : Card, ITyCard
 			},
 			new AStatus {
 				status = ModEntry.Instance.XFactorStatus.Status,
-				statusAmount = 1,
+				statusAmount = 2,
 				targetPlayer = true,
-				xHint = 1
+				xHint = 2
 			}
 		],
 		_ => [
