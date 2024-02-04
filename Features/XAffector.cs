@@ -21,6 +21,7 @@ public class XAffectorManager
     private static IModData ModData => ModEntry.Instance.Helper.ModData;
 
     internal static readonly string IncreasedHintsKey = "IncreasedHints";
+    internal static readonly string InnateIncreasedHintsKey = "InnateIncreasedHints";
 
     public XAffectorManager()
     {
@@ -168,7 +169,9 @@ public class XAffectorManager
     }
 
     private static int RenderXIncrease(int w, CardAction action, Color spriteColor, bool dontDraw, G g, int iconWidth) {
-        if (ModData.TryGetModData<int>(action, IncreasedHintsKey, out var value) && value != 0) {
+        ModData.TryGetModData(action, IncreasedHintsKey, out int value);
+        ModData.TryGetModData(action, InnateIncreasedHintsKey, out int innate);
+        if (value + innate != 0) {
             // Plus
             // w += 3;
             w--;
@@ -190,7 +193,7 @@ public class XAffectorManager
                 Rect? rect = new Rect(w - 1);
                 Vec xy = g.Push(null, rect).rect.xy;
                 Color textColor = action.disabled ? Colors.disabledText : Colors.textMain;;
-                Draw.Text(value + "", xy.x, xy.y + 2, null, textColor, null, null, null, null, dontDraw: false, null, spriteColor, null, null, null, dontSubstituteLocFont: true);
+                Draw.Text(value + innate + "", xy.x, xy.y + 2, null, textColor, null, null, null, null, dontDraw: false, null, spriteColor, null, null, null, dontSubstituteLocFont: true);
                 g.Pop();
             }
             w += (iconWidth - 5) * (int)Math.Max(1, Math.Ceiling(Math.Log10(value+1)));
@@ -203,7 +206,7 @@ public class XAffectorManager
         if (action is AVariableHintNumber aVariableHintNumber)
         {
             var icon = action.GetIcon(g.state);
-            Color textColor = (action.disabled) ? Colors.disabledText : (icon?.color ?? Colors.textMain);
+            Color textColor = action.disabled ? Colors.disabledText : (icon?.color ?? Colors.textMain);
             int number = aVariableHintNumber.number;
             w += iconNumberPadding;
             string text = DB.IntStringCache(number);
@@ -220,12 +223,16 @@ public class XAffectorManager
     }
 
     private static void AVariableHint_GetTooltips_Postfix(CardAction __instance, List<Tooltip> __result, State s) {
-        if (!ModData.TryGetModData<int>(__instance, IncreasedHintsKey, out var amt))
+        ModData.TryGetModData(__instance, IncreasedHintsKey, out int value);
+        ModData.TryGetModData(__instance, InnateIncreasedHintsKey, out int innate);
+        if (innate + value == 0)
             return;
+
+
         foreach (Tooltip t in __result) {
             if (t is TTGlossary glossary && glossary.vals != null) {
-                string last = glossary.vals[glossary.vals.Length-1]?.ToString() ?? "";
-                glossary.vals[glossary.vals.Length-1] = last + " + " + amt;
+                string last = glossary.vals[^1]?.ToString() ?? "";
+                glossary.vals[^1] = last + " + " + (value + innate);
             }
         }
     }

@@ -9,6 +9,8 @@ namespace TheJazMaster.TyAndSasha.Actions;
 
 public class AVariableHintWild : AVariableHint
 {   
+    public int displayAdjustment = 0;
+
     public AVariableHintWild() : base() {
         hand = true;
     }
@@ -26,7 +28,7 @@ public class AVariableHintWild : AVariableHint
             var amt = ModEntry.Instance.WildManager.CountWildsInHand(s, c);
             DefaultInterpolatedStringHandler stringHandler = new(22, 1);
             stringHandler.AppendLiteral(" </c>(<c=keyword>");
-            stringHandler.AppendFormatted(amt);
+            stringHandler.AppendFormatted(amt + displayAdjustment);
             stringHandler.AppendLiteral("</c>)");
             
             parentheses = stringHandler.ToStringAndClear();

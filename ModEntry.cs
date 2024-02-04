@@ -104,7 +104,6 @@ public sealed class ModEntry : SimpleMod {
 		Harmony = new(package.Manifest.UniqueName);
 		MoreDifficultiesApi = helper.ModRegistry.GetApi<IMoreDifficultiesApi>("TheJazMaster.MoreDifficulties")!;
 		KokoroApi = helper.ModRegistry.GetApi<IKokoroApi>("Shockah.Kokoro")!;
-		KokoroApi.RegisterTypeForExtensionData(typeof(Part));
 
 		WildManager = new WildManager();
 		_ = new CardBrowseFilterManager();

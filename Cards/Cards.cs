@@ -545,30 +545,32 @@ internal sealed class CrossAttackCard : Card, ITyCard
 		return upgrade switch
 		{
 			Upgrade.A => [
-				new AVariableHint {
-					status = ModEntry.Instance.XFactorStatus.Status
-				},
 				new AStatus {
 					status = ModEntry.Instance.XFactorStatus.Status,
 					statusAmount = 1,
 					targetPlayer = true
 				},
+				new AVariableHintAdjusted {
+					status = ModEntry.Instance.XFactorStatus.Status,
+					displayAdjustment = 1
+				}.ApplyModData(XAffectorManager.InnateIncreasedHintsKey, 1),
 				new AAttack {
-					damage = GetDmg(s, GetX(s) + 1),
+					damage = GetDmg(s, GetX(s) + 2),
 					xHint = 1
 				},
 			],
 			Upgrade.B => [
-				new AVariableHint {
-					status = ModEntry.Instance.XFactorStatus.Status
-				},
 				new AStatus {
 					status = ModEntry.Instance.XFactorStatus.Status,
 					statusAmount = 2,
 					targetPlayer = true
 				},
+				new AVariableHintAdjusted {
+					status = ModEntry.Instance.XFactorStatus.Status,
+					displayAdjustment = 2
+				}.ApplyModData(XAffectorManager.InnateIncreasedHintsKey, 2),
 				new AAttack {
-					damage = GetDmg(s, GetX(s) + 2),
+					damage = GetDmg(s, GetX(s) + 4),
 					xHint = 1
 				},
 			],
@@ -851,7 +853,9 @@ internal sealed class CurlUpCard : Card, IWildCard, ITyCard
 					statusAmount = 1,
 					targetPlayer = true
 				},
-				new AVariableHintWild(),
+				new AVariableHintWild {
+					displayAdjustment = 1
+				}.ApplyModData(XAffectorManager.InnateIncreasedHintsKey, 1),
 				new AStatus {
 					status = Status.shield,
 					statusAmount = amt + 1,
@@ -884,7 +888,9 @@ internal sealed class CurlUpCard : Card, IWildCard, ITyCard
 					statusAmount = 1,
 					targetPlayer = true
 				},
-				new AVariableHintWild(),
+				new AVariableHintWild {
+					displayAdjustment = 1
+				}.ApplyModData(XAffectorManager.InnateIncreasedHintsKey, 1),
 				new AStatus {
 					status = Status.shield,
 					statusAmount = amt + 1,
