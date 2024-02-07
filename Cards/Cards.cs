@@ -400,7 +400,7 @@ internal sealed class PotShotCard : Card, IWildCard, ITyCard
 	{
 		Upgrade.B => [
 			new AAttack {
-				damage = GetDmg(s, 3)
+				damage = GetDmg(s, 4)
 			},
 			new ADrawCard {
 				count = 1
@@ -408,7 +408,7 @@ internal sealed class PotShotCard : Card, IWildCard, ITyCard
 		],
 		_ => [
 			new AAttack {
-				damage = GetDmg(s, upgrade == Upgrade.A ? 4 : 3)
+				damage = GetDmg(s, upgrade == Upgrade.A ? 5 : 4)
 			},
 		]
 	};
@@ -512,9 +512,14 @@ internal sealed class PatOnTheBackCard : Card, ITyCard
 }
 
 
-internal sealed class CrossAttackCard : Card, ITyCard
+internal sealed class CrossAttackCard : Card, IWildCard, ITyCard
 {
+	private static Spr CardArt;
+	private static Spr CardArtB;
 	public static void Register(IModHelper helper) {
+		CardArt = helper.Content.Sprites.RegisterSprite(ModEntry.Instance.Package.PackageRoot.GetRelativeFile("Sprites/Cards/CrossAttack.png")).Sprite;
+		CardArtB = helper.Content.Sprites.RegisterSprite(ModEntry.Instance.Package.PackageRoot.GetRelativeFile("Sprites/Cards/CrossAttackB.png")).Sprite;
+
 		helper.Content.Cards.RegisterCard("CrossAttack", new()
 		{
 			CardType = MethodBase.GetCurrentMethod()!.DeclaringType!,
@@ -524,7 +529,6 @@ internal sealed class CrossAttackCard : Card, ITyCard
 				rarity = Rarity.uncommon,
 				upgradesTo = [Upgrade.A, Upgrade.B]
 			},
-			Art = helper.Content.Sprites.RegisterSprite(ModEntry.Instance.Package.PackageRoot.GetRelativeFile("Sprites/Cards/CrossAttack.png")).Sprite,
 			Name = ModEntry.Instance.AnyLocalizations.Bind(["card", "CrossAttack", "name"]).Localize
 		});
 	}
@@ -532,12 +536,13 @@ internal sealed class CrossAttackCard : Card, ITyCard
 	public override CardData GetData(State state) => new() {
 		cost = 1,
 		exhaust = upgrade == Upgrade.B,
+		art = upgrade == Upgrade.B ? CardArtB : CardArt,
 		artTint = "ffffff"
 	};
 
-	public int GetX(State s)
+	public bool IsWild(State s, Combat c)
 	{
-		return s.ship.Get(upgrade == Upgrade.None ? Status.shield : ModEntry.Instance.XFactorStatus.Status);
+		return upgrade == Upgrade.B;
 	}
 
 	public override List<CardAction> GetActions(State s, Combat c)
@@ -545,47 +550,44 @@ internal sealed class CrossAttackCard : Card, ITyCard
 		return upgrade switch
 		{
 			Upgrade.A => [
-				new AStatus {
-					status = ModEntry.Instance.XFactorStatus.Status,
-					statusAmount = 1,
-					targetPlayer = true
+				new AVariableHintNumber {
+					number = 1
 				},
-				new AVariableHintAdjusted {
-					status = ModEntry.Instance.XFactorStatus.Status,
-					displayAdjustment = 1
-				}.ApplyModData(XAffectorManager.InnateIncreasedHintsKey, 1),
 				new AAttack {
-					damage = GetDmg(s, GetX(s) + 2),
+					damage = GetDmg(s, 1),
+					xHint = 1
+				},
+				new AAttack {
+					damage = GetDmg(s, 1),
+					xHint = 1
+				},
+				new AAttack {
+					damage = GetDmg(s, 1),
 					xHint = 1
 				},
 			],
 			Upgrade.B => [
-				new AStatus {
-					status = ModEntry.Instance.XFactorStatus.Status,
-					statusAmount = 2,
-					targetPlayer = true
-				},
-				new AVariableHintAdjusted {
-					status = ModEntry.Instance.XFactorStatus.Status,
-					displayAdjustment = 2
-				}.ApplyModData(XAffectorManager.InnateIncreasedHintsKey, 2),
+				new AVariableHintWild(),
 				new AAttack {
-					damage = GetDmg(s, GetX(s) + 4),
+					damage = GetDmg(s, ModEntry.Instance.WildManager.CountWildsInHand(s, c)),
+					xHint = 1
+				},
+				new AAttack {
+					damage = GetDmg(s, ModEntry.Instance.WildManager.CountWildsInHand(s, c)),
 					xHint = 1
 				},
 			],
 			_ => [
-				new AVariableHint {
-					status = Status.shield
+				new AVariableHintNumber {
+					number = 1
 				},
 				new AAttack {
-					damage = GetDmg(s, GetX(s)),
+					damage = GetDmg(s, 1),
 					xHint = 1
 				},
-				new AStatus {
-					status = ModEntry.Instance.XFactorStatus.Status,
-					statusAmount = 1,
-					targetPlayer = true
+				new AAttack {
+					damage = GetDmg(s, 1),
+					xHint = 1
 				},
 			]
 		};
