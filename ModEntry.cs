@@ -166,7 +166,7 @@ public sealed class ModEntry : SimpleMod {
 
 		TyDeck = helper.Content.Decks.RegisterDeck("TyAndSasha", new()
 		{
-			Definition = new() { color = new Color("CB2867"), titleColor = Colors.black },
+			Definition = new() { color = new Color("FF6895"), titleColor = Colors.black },
 			DefaultCardArt = StableSpr.cards_colorless,
 			BorderSprite = TyCardBorder.Sprite,
 			Name = AnyLocalizations.Bind(["character", "name"]).Localize
@@ -189,7 +189,9 @@ public sealed class ModEntry : SimpleMod {
 			Deck = TyDeck.Deck,
 			Description = AnyLocalizations.Bind(["character", "description"]).Localize,
 			BorderSprite = TyFrame.Sprite,
-			StarterCardTypes = StarterCardTypes,
+			Starters = new StarterDeck {
+				cards = [ new TreatCard(), new BiteCard() ],
+			},
 			NeutralAnimation = new()
 			{
 				Deck = TyDeck.Deck,

@@ -652,8 +652,8 @@ internal sealed class AdrenalineCard : Card, IWildCard, ITyCard
 	}
 
 	public override CardData GetData(State state) => new() {
-		cost = upgrade == Upgrade.B ? 0 : upgrade == Upgrade.A ? 1 : 2,
-		exhaust = upgrade == Upgrade.B,
+		cost = upgrade == Upgrade.B ? 2 : upgrade == Upgrade.A ? 0 : 1,
+		exhaust = upgrade != Upgrade.B,
 		artTint = "ffffff"
 	};
 
@@ -1067,12 +1067,12 @@ internal sealed class DiverterCard : Card, ITyCard
 	}
 
 	public override CardData GetData(State state) => new() {
-		cost = 2,
+		cost = upgrade == Upgrade.A ? 1 : 2,
 		artTint = "ffffff"
 	};
 
 	public override List<CardAction> GetActions(State s, Combat c) => upgrade switch {
-		Upgrade.A => [
+		Upgrade.B => [
 			new AVariableHint {
 				status = Status.shield
 			},
@@ -1088,17 +1088,6 @@ internal sealed class DiverterCard : Card, ITyCard
 				mode = AStatusMode.Set,
 				targetPlayer = true
 			},
-		],
-		Upgrade.B => [
-			new AVariableHintNumber {
-				number = 1
-			},
-			new AStatus {
-				status = ModEntry.Instance.XFactorStatus.Status,
-				statusAmount = 2,
-				targetPlayer = true,
-				xHint = 2
-			}
 		],
 		_ => [
 			new AVariableHint {

@@ -3,17 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using Nanoray.Shrike;
 using Nanoray.Shrike.Harmony;
-using System.Threading.Tasks;
 using Nickel;
 using HarmonyLib;
 using System.Reflection.Emit;
 using System.Reflection;
-using Microsoft.Extensions.Logging;
-using TheJazMaster.TyAndSasha.Artifacts;
-using System.Runtime.CompilerServices;
-using Microsoft.VisualBasic;
-using System.ComponentModel;
-using TheJazMaster.TyAndSasha.Features;
 
 namespace TheJazMaster.TyAndSasha.Features;
 #nullable enable
@@ -68,22 +61,26 @@ public class CardBrowseFilterManager
 
     private static void CardBrowse_GetCardList_Postfix(CardBrowse __instance, ref List<Card> __result, G g)
     {
-        __result.RemoveAll(delegate(Card c)
-		{
-            CardData data = c.GetDataWithOverrides(g.state);
-            Combat combat = g.state.route as Combat ?? DB.fakeCombat;
+        bool doesFilterWild = ModData.TryGetModData<bool>(__instance, FilterWildKey, out var filterWild);
+        bool doesFilterWildAndBuoyant = ModData.TryGetModData<bool>(__instance, FilterWildAndBuoyantKey, out var filterWildAndBuoyant);
+        Combat combat = g.state.route as Combat ?? DB.fakeCombat;
+        if ((doesFilterWild || doesFilterWildAndBuoyant) && __instance.browseSource != CardBrowse.Source.Codex) {
+            __result.RemoveAll(delegate(Card c)
+            {
+                CardData data = c.GetDataWithOverrides(g.state);
 
-            if (ModData.TryGetModData<bool>(__instance, FilterWildKey, out var filterWild)) {
-                if (Instance.WildManager.IsWild(c, g.state, combat) != filterWild)
-                    return true;
-            }
+                if (doesFilterWild) {
+                    if (Instance.WildManager.IsWild(c, g.state, combat) != filterWild)
+                        return true;
+                }
 
-            if (ModData.TryGetModData<bool>(__instance, FilterWildAndBuoyantKey, out var filterWildAndBuoyant)) {
-                if ((Instance.WildManager.IsWild(c, g.state, combat) && data.buoyant) != filterWildAndBuoyant)
-                    return true;
-            }
+                if (doesFilterWildAndBuoyant) {
+                    if ((Instance.WildManager.IsWild(c, g.state, combat) && data.buoyant) != filterWildAndBuoyant)
+                        return true;
+                }
 
-            return false;
-        });
+                return false;
+            });
+        }
     }
 }
