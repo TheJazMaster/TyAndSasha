@@ -1,5 +1,5 @@
 # Ty & Sasha
-A Nickel mod for Cobalt Core mod with code by me and everything else by **Soggoru Waffle**. 
+A Nickel mod for Cobalt Core with code by me and everything else by **Soggoru Waffle**. 
 
 Features a character with a full 21-card deck, 6 artifacts, complete card art and many new mechanics.
 
