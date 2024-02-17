@@ -65,6 +65,8 @@ public class StatusManager : IStatusLogicHook
 			return false;
 		if (timing != StatusTurnTriggerTiming.TurnEnd)
 			return false;
+        if (ship.Get(Status.timeStop) > 0)
+            return false;
 
 		if (amount > 0)
 			amount = Math.Max(amount - 1, 0);

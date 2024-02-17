@@ -230,7 +230,7 @@ public class XAffectorManager
 
 
         foreach (Tooltip t in __result) {
-            if (t is TTGlossary glossary && glossary.vals != null) {
+            if (t is TTGlossary glossary && glossary.vals != null && glossary.vals.Length > 0) {
                 string last = glossary.vals[^1]?.ToString() ?? "";
                 glossary.vals[^1] = last + " + " + (value + innate);
             }
