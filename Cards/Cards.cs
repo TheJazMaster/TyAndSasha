@@ -535,7 +535,6 @@ internal sealed class CrossAttackCard : Card, IWildCard, ITyCard
 
 	public override CardData GetData(State state) => new() {
 		cost = 1,
-		exhaust = upgrade == Upgrade.B,
 		art = upgrade == Upgrade.B ? CardArtB : CardArt,
 		artTint = "ffffff"
 	};

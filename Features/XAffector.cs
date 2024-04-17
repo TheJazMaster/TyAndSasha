@@ -42,10 +42,10 @@ public class XAffectorManager
 		);
     }
     
-    private static int GetXBonus(Card card, List<CardAction> actions, State s, Combat c) {
+    internal static int GetXBonus(Card card, List<CardAction> actions, State s, Combat c) {
         int baseXBonus = 0;
         foreach (Artifact item in s.EnumerateAllArtifacts()) {
-            if (item is XAffectorArtifact xAffector) {
+            if (item is IXAffectorArtifact xAffector) {
                 baseXBonus += xAffector.AffectX(card, actions, s, c, baseXBonus);
             }
         }
@@ -171,6 +171,7 @@ public class XAffectorManager
     private static int RenderXIncrease(int w, CardAction action, Color spriteColor, bool dontDraw, G g, int iconWidth) {
         ModData.TryGetModData(action, IncreasedHintsKey, out int value);
         ModData.TryGetModData(action, InnateIncreasedHintsKey, out int innate);
+
         if (value + innate != 0) {
             // Plus
             // w += 3;

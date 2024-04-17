@@ -287,7 +287,7 @@ internal sealed class ScratchingPostArtifact : Artifact, ITyArtifact
 }
 
 
-internal sealed class GenomeSplicingArtifact : Artifact, ITyArtifact, XAffectorArtifact
+internal sealed class GenomeSplicingArtifact : Artifact, ITyArtifact, IXAffectorArtifact
 {
 	public static void Register(IModHelper helper)
 	{

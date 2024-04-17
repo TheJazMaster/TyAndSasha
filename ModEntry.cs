@@ -11,6 +11,7 @@ using TheJazMaster.TyAndSasha.Artifacts;
 using TheJazMaster.TyAndSasha.Cards;
 using TheJazMaster.TyAndSasha.Features;
 
+#nullable enable
 namespace TheJazMaster.TyAndSasha;
 
 public sealed class ModEntry : SimpleMod {
@@ -223,4 +224,7 @@ public sealed class ModEntry : SimpleMod {
 			Frames = [TyPortrait.Sprite]
 		});
     }
+
+	public override object? GetApi(IModManifest requestingMod)
+		=> new ApiImplementation();
 }
