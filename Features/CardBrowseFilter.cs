@@ -70,12 +70,12 @@ public class CardBrowseFilterManager
                 CardData data = c.GetDataWithOverrides(g.state);
 
                 if (doesFilterWild) {
-                    if (Instance.WildManager.IsWild(c, g.state, combat) != filterWild)
+                    if (WildManager.IsWild(c, g.state) != filterWild)
                         return true;
                 }
 
                 if (doesFilterWildAndBuoyant) {
-                    if ((Instance.WildManager.IsWild(c, g.state, combat) && data.buoyant) != filterWildAndBuoyant)
+                    if ((WildManager.IsWild(c, g.state) && data.buoyant) != filterWildAndBuoyant)
                         return true;
                 }
 

@@ -1,4 +1,7 @@
 using System.Collections.Generic;
+using System.Linq;
+using Nickel;
+using TheJazMaster.TyAndSasha.Features;
 
 #nullable enable
 namespace TheJazMaster.TyAndSasha.Actions;
@@ -11,7 +14,8 @@ public class AMakeWildAndBuoyant : CardAction
 	public override Route? BeginWithRoute(G g, State s, Combat c)
 	{
         if (selectedCard != null) {
-		    ModEntry.Instance.WildManager.SetWild(selectedCard, true, permanent);
+            ModEntry.Instance.Helper.Content.Cards.SetCardTraitOverride(s, selectedCard, WildManager.WildTrait, true, permanent);
+		    // ModEntry.Instance.WildManager.SetWild(selectedCard, true, permanent);
             selectedCard.buoyantOverride = true;
             if (permanent)
                 selectedCard.buoyantOverrideIsPermanent = permanent;
@@ -38,20 +42,21 @@ public class AMakeWildAndBuoyant : CardAction
 	public override List<Tooltip> GetTooltips(State s)
 	{
         return [
-            new CustomTTGlossary(
-                CustomTTGlossary.GlossaryType.action,
-                () => ModEntry.Instance.WildIcon.Sprite,
-                () => ModEntry.Instance.Localizations.Localize(["action", "makeWildAndBuoyant", "name"]),
-                () => ModEntry.Instance.Localizations.Localize(["action", "makeWildAndBuoyant", "description"], new { Duration = GetDuration() })
-            ),
-            new CustomTTGlossary(
-                CustomTTGlossary.GlossaryType.cardtrait,
-                () => ModEntry.Instance.WildIcon.Sprite,
-                () => ModEntry.Instance.Localizations.Localize(["trait", "wild", "name"]),
-                () => ModEntry.Instance.Localizations.Localize(["trait", "wild", "description"]),
-				key: "trait.wild"
-            ),
-            new TTGlossary("cardtrait.buoyant")
+            new GlossaryTooltip($"action.{GetType().Namespace!}::MakeWildAndBuoyant") {
+                Icon = ModEntry.Instance.WildIcon.Sprite,
+                TitleColor = Colors.action,
+                Title = ModEntry.Instance.Localizations.Localize(["action", "makeWildAndBuoyant", "name"]),
+                Description = ModEntry.Instance.Localizations.Localize(["action", "makeWildAndBuoyant", "description"], new { Duration = GetDuration() })
+			},
+            // new CustomTTGlossary(
+            //     CustomTTGlossary.GlossaryType.cardtrait,
+            //     () => ModEntry.Instance.WildIcon.Sprite,
+            //     () => ModEntry.Instance.Localizations.Localize(["trait", "wild", "name"]),
+            //     () => ModEntry.Instance.Localizations.Localize(["trait", "wild", "description"]),
+			// 	key: "trait.wild"
+            // ),
+            .. WildManager.WildTrait.Configuration.Tooltips!(s, selectedCard),
+            // new TTGlossary("cardtrait.buoyant")
         ];
 	}
 

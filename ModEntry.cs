@@ -15,11 +15,11 @@ using TheJazMaster.TyAndSasha.Features;
 namespace TheJazMaster.TyAndSasha;
 
 public sealed class ModEntry : SimpleMod {
-    internal static ModEntry Instance { get; private set; } = null;
+    internal static ModEntry Instance { get; private set; } = null!;
 
     internal Harmony Harmony { get; }
 	internal IKokoroApi KokoroApi { get; }
-	internal IMoreDifficultiesApi MoreDifficultiesApi { get; }
+	internal IMoreDifficultiesApi? MoreDifficultiesApi { get; }
 
 	internal WildManager WildManager { get; }
 
@@ -110,7 +110,6 @@ public sealed class ModEntry : SimpleMod {
 		_ = new CardBrowseFilterManager();
 		_ = new XAffectorManager();
 		_ = new StatusManager();
-		CustomTTGlossary.ApplyPatches(Harmony);
 
 		AnyLocalizations = new JsonLocalizationProvider(
 			tokenExtractor: new SimpleLocalizationTokenExtractor(),

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using TheJazMaster.TyAndSasha.Features;
 
 namespace TheJazMaster.TyAndSasha.Actions;
 
@@ -25,7 +26,7 @@ public class AVariableHintWild : AVariableHint
         string parentheses = "";
         if (s.route is Combat c)
         {
-            var amt = ModEntry.Instance.WildManager.CountWildsInHand(s, c);
+            var amt = WildManager.CountWildsInHand(s, c);
             DefaultInterpolatedStringHandler stringHandler = new(22, 1);
             stringHandler.AppendLiteral(" </c>(<c=keyword>");
             stringHandler.AppendFormatted(amt + displayAdjustment);

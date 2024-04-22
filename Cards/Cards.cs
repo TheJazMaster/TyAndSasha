@@ -83,7 +83,7 @@ internal sealed class TreatCard : Card, ITyCard
 }
 
 
-internal sealed class BiteCard : Card, IWildCard, ITyCard
+internal sealed class BiteCard : Card, IHasCustomCardTraits, ITyCard
 {
 	public static void Register(IModHelper helper) {
 		helper.Content.Cards.RegisterCard("Bite", new()
@@ -104,15 +104,14 @@ internal sealed class BiteCard : Card, IWildCard, ITyCard
 		cost = 1,
 		artTint = "ffffff"
 	};
-
-	public bool IsWild(State s, Combat c) => true;
+	public IReadOnlySet<ICardTraitEntry> GetInnateTraits(State state) => new HashSet<ICardTraitEntry>() { WildManager.WildTrait };
 
 	public override List<CardAction> GetActions(State s, Combat c) => upgrade switch
 	{
 		Upgrade.A => [
 			new AVariableHintWild(),
 			new AAttack {
-				damage = GetDmg(s, ModEntry.Instance.WildManager.CountWildsInHand(s, c)),
+				damage = GetDmg(s, WildManager.CountWildsInHand(s, c)),
 				xHint = 1
 			},
 			new AStatus
@@ -125,7 +124,7 @@ internal sealed class BiteCard : Card, IWildCard, ITyCard
 		Upgrade.B => [
 			new AVariableHintWild(),
 			new AAttack {
-				damage = GetDmg(s, ModEntry.Instance.WildManager.CountWildsInHand(s, c)),
+				damage = GetDmg(s, WildManager.CountWildsInHand(s, c)),
 				piercing = true,
 				xHint = 1
 			}
@@ -133,14 +132,14 @@ internal sealed class BiteCard : Card, IWildCard, ITyCard
 		_ => [
 			new AVariableHintWild(),
 			new AAttack {
-				damage = GetDmg(s, ModEntry.Instance.WildManager.CountWildsInHand(s, c)),
+				damage = GetDmg(s, WildManager.CountWildsInHand(s, c)),
 				xHint = 1
 			}
 		]
 	};
 }
 
-internal sealed class ScratchCard : Card, IWildCard, ITyCard
+internal sealed class ScratchCard : Card, IHasCustomCardTraits, ITyCard
 {
 	public static void Register(IModHelper helper) {
 		helper.Content.Cards.RegisterCard("Scratch", new()
@@ -162,11 +161,11 @@ internal sealed class ScratchCard : Card, IWildCard, ITyCard
 		artTint = "ffffff"
 	};
 
-	public bool IsWild(State s, Combat c) => true;
+	public IReadOnlySet<ICardTraitEntry> GetInnateTraits(State state) => new HashSet<ICardTraitEntry>() { WildManager.WildTrait };
 
 	public override List<CardAction> GetActions(State s, Combat c)
 	{
-		var dmg = ModEntry.Instance.WildManager.CountWildsInHand(s, c);
+		var dmg = WildManager.CountWildsInHand(s, c);
 		return upgrade switch
 		{
 			Upgrade.A => [
@@ -218,7 +217,7 @@ internal sealed class ScratchCard : Card, IWildCard, ITyCard
 	}
 }
 
-internal sealed class ScurryCard : Card, IWildCard, ITyCard
+internal sealed class ScurryCard : Card, IHasCustomCardTraits, ITyCard
 {
 	public static void Register(IModHelper helper) {
 		helper.Content.Cards.RegisterCard("Scurry", new()
@@ -241,11 +240,11 @@ internal sealed class ScurryCard : Card, IWildCard, ITyCard
 		artTint = "ffffff"
 	};
 
-	public bool IsWild(State s, Combat c) => true;
+	public IReadOnlySet<ICardTraitEntry> GetInnateTraits(State state) => new HashSet<ICardTraitEntry>() { WildManager.WildTrait };
 
 	public override List<CardAction> GetActions(State s, Combat c)
 	{
-		var amt = ModEntry.Instance.WildManager.CountWildsInHand(s, c);
+		var amt = WildManager.CountWildsInHand(s, c);
 		return upgrade switch
 		{
 			Upgrade.A => [
@@ -310,7 +309,7 @@ internal sealed class HugsCard : Card, ITyCard
 	];
 }
 
-internal sealed class ZoomiesCard : Card, IWildCard, ITyCard
+internal sealed class ZoomiesCard : Card, IHasCustomCardTraits, ITyCard
 {
 	public static void Register(IModHelper helper) {
 		helper.Content.Cards.RegisterCard("Zoomies", new()
@@ -333,11 +332,11 @@ internal sealed class ZoomiesCard : Card, IWildCard, ITyCard
 		artTint = "ffffff"
 	};
 
-	public bool IsWild(State s, Combat c) => true;
+	public IReadOnlySet<ICardTraitEntry> GetInnateTraits(State state) => new HashSet<ICardTraitEntry>() { WildManager.WildTrait };
 
 	public override List<CardAction> GetActions(State s, Combat c)
 	{
-		var amt = ModEntry.Instance.WildManager.CountWildsInHand(s, c);
+		var amt = WildManager.CountWildsInHand(s, c);
 		return upgrade switch
 		{
 			Upgrade.B => [
@@ -365,7 +364,7 @@ internal sealed class ZoomiesCard : Card, IWildCard, ITyCard
 	}
 }
 
-internal sealed class PotShotCard : Card, IWildCard, ITyCard
+internal sealed class PotShotCard : Card, IHasCustomCardTraits, ITyCard
 {
 	private static Spr CardArt;
 	private static Spr CardArtA;
@@ -394,7 +393,10 @@ internal sealed class PotShotCard : Card, IWildCard, ITyCard
 		artTint = "ffffff"
 	};
 
-	public bool IsWild(State s, Combat c) => upgrade == Upgrade.A;
+	public IReadOnlySet<ICardTraitEntry> GetInnateTraits(State state) => upgrade switch {
+		Upgrade.A => [WildManager.WildTrait],
+		_ => new HashSet<ICardTraitEntry>()
+	};
 
 	public override List<CardAction> GetActions(State s, Combat c) => upgrade switch
 	{
@@ -512,7 +514,7 @@ internal sealed class PatOnTheBackCard : Card, ITyCard
 }
 
 
-internal sealed class CrossAttackCard : Card, IWildCard, ITyCard
+internal sealed class CrossAttackCard : Card, IHasCustomCardTraits, ITyCard
 {
 	private static Spr CardArt;
 	private static Spr CardArtB;
@@ -539,10 +541,10 @@ internal sealed class CrossAttackCard : Card, IWildCard, ITyCard
 		artTint = "ffffff"
 	};
 
-	public bool IsWild(State s, Combat c)
-	{
-		return upgrade == Upgrade.B;
-	}
+	public IReadOnlySet<ICardTraitEntry> GetInnateTraits(State state) => upgrade switch {
+		Upgrade.B => [WildManager.WildTrait],
+		_ => new HashSet<ICardTraitEntry>()
+	};
 
 	public override List<CardAction> GetActions(State s, Combat c)
 	{
@@ -568,11 +570,11 @@ internal sealed class CrossAttackCard : Card, IWildCard, ITyCard
 			Upgrade.B => [
 				new AVariableHintWild(),
 				new AAttack {
-					damage = GetDmg(s, ModEntry.Instance.WildManager.CountWildsInHand(s, c)),
+					damage = GetDmg(s, WildManager.CountWildsInHand(s, c)),
 					xHint = 1
 				},
 				new AAttack {
-					damage = GetDmg(s, ModEntry.Instance.WildManager.CountWildsInHand(s, c)),
+					damage = GetDmg(s, WildManager.CountWildsInHand(s, c)),
 					xHint = 1
 				},
 			],
@@ -594,7 +596,7 @@ internal sealed class CrossAttackCard : Card, IWildCard, ITyCard
 }
 
 
-internal sealed class InstinctsCard : Card, IWildCard, ITyCard
+internal sealed class InstinctsCard : Card, IHasCustomCardTraits, ITyCard
 {
 	public static void Register(IModHelper helper) {
 		helper.Content.Cards.RegisterCard("Instincts", new()
@@ -618,14 +620,14 @@ internal sealed class InstinctsCard : Card, IWildCard, ITyCard
 		artTint = "ffffff"
 	};
 
-	public bool IsWild(State s, Combat c) => true;
+	public IReadOnlySet<ICardTraitEntry> GetInnateTraits(State state) => new HashSet<ICardTraitEntry>() { WildManager.WildTrait };
 
 	public override List<CardAction> GetActions(State s, Combat c) => 
 	[
 		new AVariableHintWild(),
 		new AStatus {
 			status = Status.tempShield,
-			statusAmount = ModEntry.Instance.WildManager.CountWildsInHand(s, c),
+			statusAmount = WildManager.CountWildsInHand(s, c),
 			targetPlayer = true,
 			xHint = 1
 		},
@@ -633,7 +635,7 @@ internal sealed class InstinctsCard : Card, IWildCard, ITyCard
 }
 
 
-internal sealed class AdrenalineCard : Card, IWildCard, ITyCard
+internal sealed class AdrenalineCard : Card, IHasCustomCardTraits, ITyCard
 {
 	public static void Register(IModHelper helper) {
 		helper.Content.Cards.RegisterCard("Adrenaline", new()
@@ -656,20 +658,20 @@ internal sealed class AdrenalineCard : Card, IWildCard, ITyCard
 		artTint = "ffffff"
 	};
 
-	public bool IsWild(State s, Combat c) => true;
+	public IReadOnlySet<ICardTraitEntry> GetInnateTraits(State state) => new HashSet<ICardTraitEntry>() { WildManager.WildTrait };
 
 	public override List<CardAction> GetActions(State s, Combat c) => 
 	[
 		new AVariableHintWild(),
 		new AEnergy {
-			changeAmount = ModEntry.Instance.WildManager.CountWildsInHand(s, c),
+			changeAmount = WildManager.CountWildsInHand(s, c),
 			xHint = 1
 		},
 	];
 }
 
 
-internal sealed class PounceCard : Card, IWildCard, ITyCard
+internal sealed class PounceCard : Card, IHasCustomCardTraits, ITyCard
 {
 	public static void Register(IModHelper helper) {
 		helper.Content.Cards.RegisterCard("Pounce", new()
@@ -693,10 +695,10 @@ internal sealed class PounceCard : Card, IWildCard, ITyCard
 		artTint = "ffffff"
 	};
 
-	public bool IsWild(State s, Combat c) => true;
+	public IReadOnlySet<ICardTraitEntry> GetInnateTraits(State state) => new HashSet<ICardTraitEntry>() { WildManager.WildTrait };
 
 	public override List<CardAction> GetActions(State s, Combat c) {
-		var amt = ModEntry.Instance.WildManager.CountWildsInHand(s, c);
+		var amt = WildManager.CountWildsInHand(s, c);
 		return upgrade switch {
 			Upgrade.A => [
 				new AVariableHintWild(),
@@ -772,7 +774,7 @@ internal sealed class AugmentDNACard : Card, ITyCard
 	};
 
 	public override List<CardAction> GetActions(State s, Combat c) {
-		var amt = ModEntry.Instance.WildManager.CountWildsInHand(s, c);
+		var amt = WildManager.CountWildsInHand(s, c);
 		return upgrade switch {
 			Upgrade.A => [
 				new ACardSelectImproved
@@ -821,7 +823,7 @@ internal sealed class AugmentDNACard : Card, ITyCard
 }
 
 
-internal sealed class CurlUpCard : Card, IWildCard, ITyCard
+internal sealed class CurlUpCard : Card, IHasCustomCardTraits, ITyCard
 {
 	public static void Register(IModHelper helper) {
 		helper.Content.Cards.RegisterCard("CurlUp", new()
@@ -843,10 +845,10 @@ internal sealed class CurlUpCard : Card, IWildCard, ITyCard
 		artTint = "ffffff"
 	};
 
-	public bool IsWild(State s, Combat c) => true;
+	public IReadOnlySet<ICardTraitEntry> GetInnateTraits(State state) => new HashSet<ICardTraitEntry>() { WildManager.WildTrait };
 
 	public override List<CardAction> GetActions(State s, Combat c) {
-		var amt = ModEntry.Instance.WildManager.CountWildsInHand(s, c);
+		var amt = WildManager.CountWildsInHand(s, c);
 		return upgrade switch {
 			Upgrade.A => [
 				new AStatus {
@@ -955,7 +957,7 @@ internal sealed class CompoundCard : Card, ITyCard
 }
 
 
-internal sealed class PredationCard : Card, IWildCard, ITyCard
+internal sealed class PredationCard : Card, IHasCustomCardTraits, ITyCard
 {
 	public static void Register(IModHelper helper) {
 		helper.Content.Cards.RegisterCard("Predation", new()
@@ -978,14 +980,14 @@ internal sealed class PredationCard : Card, IWildCard, ITyCard
 		artTint = "ffffff"
 	};
 
-	public bool IsWild(State s, Combat c) => true;
+	public IReadOnlySet<ICardTraitEntry> GetInnateTraits(State state) => new HashSet<ICardTraitEntry>() { WildManager.WildTrait };
 
 	public override List<CardAction> GetActions(State s, Combat c) => upgrade switch {
 		Upgrade.B => [
 			new AVariableHintWild(),
 			new AStatus {
 				status = ModEntry.Instance.PredationStatus.Status,
-				statusAmount = ModEntry.Instance.WildManager.CountWildsInHand(s, c),
+				statusAmount = WildManager.CountWildsInHand(s, c),
 				targetPlayer = true,
 				xHint = 1
 			},
@@ -1109,7 +1111,7 @@ internal sealed class DiverterCard : Card, ITyCard
 }
 
 
-internal sealed class HibernateCard : Card, IWildCard, ITyCard
+internal sealed class HibernateCard : Card, IHasCustomCardTraits, ITyCard
 {
 	public static void Register(IModHelper helper) {
 		helper.Content.Cards.RegisterCard("Hibernate", new()
@@ -1131,10 +1133,10 @@ internal sealed class HibernateCard : Card, IWildCard, ITyCard
 		artTint = "ffffff"
 	};
 
-	public bool IsWild(State s, Combat c) => true;
+	public IReadOnlySet<ICardTraitEntry> GetInnateTraits(State state) => new HashSet<ICardTraitEntry>() { WildManager.WildTrait };
 
 	public override List<CardAction> GetActions(State s, Combat c) {
-		var amt = ModEntry.Instance.WildManager.CountWildsInHand(s, c);
+		var amt = WildManager.CountWildsInHand(s, c);
 		return upgrade switch {
 			Upgrade.B => [
 				new AVariableHintWild(),
@@ -1166,7 +1168,7 @@ internal sealed class HibernateCard : Card, IWildCard, ITyCard
 }
 
 
-internal sealed class FetchCard : Card, IWildCard, ITyCard
+internal sealed class FetchCard : Card, IHasCustomCardTraits, ITyCard
 {
 	public static void Register(IModHelper helper) {
 		helper.Content.Cards.RegisterCard("Fetch", new()
@@ -1189,7 +1191,7 @@ internal sealed class FetchCard : Card, IWildCard, ITyCard
 		artTint = "ffffff"
 	};
 
-	public bool IsWild(State s, Combat c) => true;
+	public IReadOnlySet<ICardTraitEntry> GetInnateTraits(State state) => new HashSet<ICardTraitEntry>() { WildManager.WildTrait };
 
 	public override List<CardAction> GetActions(State s, Combat c) => upgrade switch {
 		Upgrade.A => [

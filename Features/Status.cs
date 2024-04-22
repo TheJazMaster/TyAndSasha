@@ -51,7 +51,7 @@ public class StatusManager : IStatusLogicHook
     private static void PredationTrigger(State s, Combat c, Card card)
     {
         var predation = Instance.PredationStatus.Status;
-        if (Instance.WildManager.IsWild(card, s, c) && s.ship.Get(predation) > 0) {
+        if (WildManager.IsWild(card, s) && s.ship.Get(predation) > 0) {
             c.Queue(new AAttack {
                 damage = card.GetDmg(s, s.ship.Get(predation)),
                 statusPulse = predation

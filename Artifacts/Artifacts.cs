@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
 using Nickel;
@@ -53,15 +54,15 @@ internal sealed class LycanthropyArtifact : Artifact, ITyArtifact
 
 	public override List<Tooltip>? GetExtraTooltips()
 	{
-		return [
-            new CustomTTGlossary(
-                CustomTTGlossary.GlossaryType.cardtrait,
-                () => ModEntry.Instance.WildIcon.Sprite,
-                () => ModEntry.Instance.Localizations.Localize(["trait", "wild", "name"]),
-                () => ModEntry.Instance.Localizations.Localize(["trait", "wild", "description"]),
-				key: "trait.wild"
-            )
-		];
+		return WildManager.WildTrait.Configuration.Tooltips!(DB.fakeState, null).ToList();
+			
+            // new CustomTTGlossary(
+            //     CustomTTGlossary.GlossaryType.cardtrait,
+            //     () => ModEntry.Instance.WildIcon.Sprite,
+            //     () => ModEntry.Instance.Localizations.Localize(["trait", "wild", "name"]),
+            //     () => ModEntry.Instance.Localizations.Localize(["trait", "wild", "description"]),
+			// 	key: "trait.wild"
+            // )
 	}
 }
 
@@ -100,16 +101,7 @@ internal sealed class NaturalTalentArtifact : Artifact, ITyArtifact
 
 	public override List<Tooltip>? GetExtraTooltips()
 	{
-		return [
-            new CustomTTGlossary(
-                CustomTTGlossary.GlossaryType.cardtrait,
-                () => ModEntry.Instance.WildIcon.Sprite,
-                () => ModEntry.Instance.Localizations.Localize(["trait", "wild", "name"]),
-                () => ModEntry.Instance.Localizations.Localize(["trait", "wild", "description"]),
-				key: "trait.wild"
-            ),
-			new TTGlossary("cardtrait.buoyant"),
-		];
+		return WildManager.WildTrait.Configuration.Tooltips!(DB.fakeState, null).Append(new TTGlossary("cardtrait.buoyant")).ToList();
 	}
 }
 
@@ -253,7 +245,7 @@ internal sealed class ScratchingPostArtifact : Artifact, ITyArtifact
 
 	public override void OnPlayerPlayCard(int energyCost, Deck deck, Card card, State state, Combat combat, int handPosition, int handCount)
 	{
-		if (ModEntry.Instance.WildManager.IsWild(card, state, combat)) {
+		if (WildManager.IsWild(card, state)) {
 			turnedOn = false;
 			Pulse();
 		}
@@ -265,7 +257,7 @@ internal sealed class ScratchingPostArtifact : Artifact, ITyArtifact
 		{
 			return 0;
 		}
-		if (ModEntry.Instance.WildManager.IsWild(card, state, combat ?? DB.fakeCombat))
+		if (WildManager.IsWild(card, state))
 		{
 			return 1;
 		}
@@ -274,15 +266,7 @@ internal sealed class ScratchingPostArtifact : Artifact, ITyArtifact
 
 	public override List<Tooltip>? GetExtraTooltips()
 	{
-		return [
-            new CustomTTGlossary(
-                CustomTTGlossary.GlossaryType.cardtrait,
-                () => ModEntry.Instance.WildIcon.Sprite,
-                () => ModEntry.Instance.Localizations.Localize(["trait", "wild", "name"]),
-                () => ModEntry.Instance.Localizations.Localize(["trait", "wild", "description"]),
-				key: "trait.wild"
-            )
-		];
+		return WildManager.WildTrait.Configuration.Tooltips!(DB.fakeState, null).ToList();
 	}
 }
 
@@ -309,7 +293,7 @@ internal sealed class GenomeSplicingArtifact : Artifact, ITyArtifact, IXAffector
 	{
 		foreach(CardAction action in actions) {
 			if (action is AVariableHint && action is not AVariableHintWild) {
-				return ModEntry.Instance.WildManager.CountWildsInHand(s, c);
+				return WildManager.CountWildsInHand(s, c);
 			}
 		}
 		return 0;
@@ -317,14 +301,6 @@ internal sealed class GenomeSplicingArtifact : Artifact, ITyArtifact, IXAffector
 
 	public override List<Tooltip>? GetExtraTooltips()
 	{
-		return [
-            new CustomTTGlossary(
-                CustomTTGlossary.GlossaryType.cardtrait,
-                () => ModEntry.Instance.WildIcon.Sprite,
-                () => ModEntry.Instance.Localizations.Localize(["trait", "wild", "name"]),
-                () => ModEntry.Instance.Localizations.Localize(["trait", "wild", "description"]),
-				key: "trait.wild"
-            )
-		];
+		return WildManager.WildTrait.Configuration.Tooltips!(DB.fakeState, null).ToList();
 	}
 }

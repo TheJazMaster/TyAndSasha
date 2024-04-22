@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using Nickel;
+using TheJazMaster.TyAndSasha.Features;
 
 #nullable enable
 namespace TheJazMaster.TyAndSasha.Actions;
@@ -12,7 +14,8 @@ public class AMakeWild : CardAction
 	public override Route? BeginWithRoute(G g, State s, Combat c)
 	{
         if (selectedCard != null) {
-            ModEntry.Instance.WildManager.SetWild(selectedCard, true, permanent);
+            ModEntry.Instance.Helper.Content.Cards.SetCardTraitOverride(s, selectedCard, WildManager.WildTrait, true, permanent);
+            // ModEntry.Instance.WildManager.SetWild(selectedCard, true, permanent);
             
             return showCard ? new CustomShowCards
 			{
@@ -35,19 +38,20 @@ public class AMakeWild : CardAction
 	public override List<Tooltip> GetTooltips(State s)
 	{
         return [
-            new CustomTTGlossary(
-                CustomTTGlossary.GlossaryType.action,
-                () => ModEntry.Instance.WildIcon.Sprite,
-                () => ModEntry.Instance.Localizations.Localize(["action", "makeWild", "name"]),
-                () => ModEntry.Instance.Localizations.Localize(["action", "makeWild", "description"], new { Duration = GetDuration() })
-            ),
-            new CustomTTGlossary(
-                CustomTTGlossary.GlossaryType.cardtrait,
-                () => ModEntry.Instance.WildIcon.Sprite,
-                () => ModEntry.Instance.Localizations.Localize(["trait", "wild", "name"]),
-                () => ModEntry.Instance.Localizations.Localize(["trait", "wild", "description"]),
-				key: "trait.wild"
-            )
+            new GlossaryTooltip($"action.{GetType().Namespace!}::MakeWild") {
+                Icon = ModEntry.Instance.WildIcon.Sprite,
+                TitleColor = Colors.action,
+                Title = ModEntry.Instance.Localizations.Localize(["action", "makeWild", "name"]),
+                Description = ModEntry.Instance.Localizations.Localize(["action", "makeWild", "description"], new { Duration = GetDuration() })
+			},
+            .. WildManager.WildTrait.Configuration.Tooltips!(s, selectedCard),
+            // new CustomTTGlossary(
+            //     CustomTTGlossary.GlossaryType.cardtrait,
+            //     () => ModEntry.Instance.WildIcon.Sprite,
+            //     () => ModEntry.Instance.Localizations.Localize(["trait", "wild", "name"]),
+            //     () => ModEntry.Instance.Localizations.Localize(["trait", "wild", "description"]),
+			// 	key: "trait.wild"
+            // )
         ];
 	}
 
