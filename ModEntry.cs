@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using TheJazMaster.TyAndSasha.Actions;
 using TheJazMaster.TyAndSasha.Artifacts;
 using TheJazMaster.TyAndSasha.Cards;
 using TheJazMaster.TyAndSasha.Features;
@@ -20,6 +21,7 @@ public sealed class ModEntry : SimpleMod {
     internal Harmony Harmony { get; }
 	internal IKokoroApi KokoroApi { get; }
 	internal IMoreDifficultiesApi? MoreDifficultiesApi { get; }
+	internal IDuoArtifactsApi? DuoArtifactsApi { get; }
 
 	internal WildManager WildManager { get; }
 
@@ -95,16 +97,28 @@ public sealed class ModEntry : SimpleMod {
 		typeof(GenomeSplicingArtifact)
 	];
 
+	internal static IReadOnlyList<Type> DuoArtifacts { get; } = [
+		typeof(AimingReticleArtifact),
+		typeof(SashaSnacksArtifact),
+		typeof(PartyBalloonArtifact),
+		typeof(PetRockArtifact),
+		typeof(PirateMapArtifact),
+		typeof(FunhouseMirrorArtifact),
+		typeof(DruidismArtifact),
+		typeof(VirtualPetSimArtifact)
+	];
+
 	internal static IEnumerable<Type> AllArtifactTypes
-		=> CommonArtifacts.Concat(BossArtifacts);
+		=> CommonArtifacts.Concat(BossArtifacts).Concat(DuoArtifacts);
 
     
     public ModEntry(IPluginPackage<IModManifest> package, IModHelper helper, ILogger logger) : base(package, helper, logger)
 	{
 		Instance = this;
 		Harmony = new(package.Manifest.UniqueName);
-		MoreDifficultiesApi = helper.ModRegistry.GetApi<IMoreDifficultiesApi>("TheJazMaster.MoreDifficulties")!;
+		MoreDifficultiesApi = helper.ModRegistry.GetApi<IMoreDifficultiesApi>("TheJazMaster.MoreDifficulties");
 		KokoroApi = helper.ModRegistry.GetApi<IKokoroApi>("Shockah.Kokoro")!;
+		DuoArtifactsApi = helper.ModRegistry.GetApi<IDuoArtifactsApi>("Shockah.DuoArtifacts");
 
 		WildManager = new WildManager();
 		_ = new CardBrowseFilterManager();
@@ -222,6 +236,35 @@ public sealed class ModEntry : SimpleMod {
 			LoopTag = "squint",
 			Frames = [TyPortrait.Sprite]
 		});
+
+
+		ICardTraitEntry TemporaryCardTrait = helper.Content.Cards.TemporaryCardTrait;
+		helper.Content.Cards.OnGetVolatileCardTraitOverrides += (_, data) => {
+			State state = data.State;
+			if (state.route is Combat combat) {
+				WildManager.ignoreCount = true;
+				if (!data.TraitStates[WildManager.WildTrait].IsActive) {
+					foreach (Artifact item in data.State.EnumerateAllArtifacts()) {
+						if (item is GenomeSplicingArtifact) {
+							foreach (CardAction action in data.Card.GetActions(state, combat)) {
+								if (action is AVariableHint && action is not AVariableHintWild) {
+									data.SetVolatileOverride(WildManager.WildTrait, true);
+									break;
+								}
+							}
+						}
+					}
+				}
+				if (data.TraitStates[TemporaryCardTrait].IsActive) {
+					foreach (Artifact item in data.State.EnumerateAllArtifacts()) {
+						if (item is VirtualPetSimArtifact) {
+							data.SetVolatileOverride(WildManager.WildTrait, true);
+						}
+					}
+				}
+				WildManager.ignoreCount = false;
+			}
+		};
     }
 
 	public override object? GetApi(IModManifest requestingMod)

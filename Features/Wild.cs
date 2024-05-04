@@ -66,13 +66,15 @@ public class WildManager
     //         ModData.SetModData(card, WildOverridePermanentKey, permanent);
     // }
 
+    internal static bool ignoreCount = false;
+
     public static bool IsWild(Card card, State s)
     {
         return CardsHelper.IsCardTraitActive(s, card, WildTrait);
     }
 
     public static int CountWildsInHand(State s, Combat c) {
-        return c.hand.Where(card => IsWild(card, s)).Count();
+        return ignoreCount ? 0 : c.hand.Count(card => IsWild(card, s));
     }
 
 

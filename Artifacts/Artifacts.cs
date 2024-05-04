@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
 using Nickel;
+using Nickel.Models.Content;
 using TheJazMaster.TyAndSasha.Actions;
 using TheJazMaster.TyAndSasha.Cards;
 using TheJazMaster.TyAndSasha.Features;
@@ -55,14 +56,6 @@ internal sealed class LycanthropyArtifact : Artifact, ITyArtifact
 	public override List<Tooltip>? GetExtraTooltips()
 	{
 		return WildManager.WildTrait.Configuration.Tooltips!(DB.fakeState, null).ToList();
-			
-            // new CustomTTGlossary(
-            //     CustomTTGlossary.GlossaryType.cardtrait,
-            //     () => ModEntry.Instance.WildIcon.Sprite,
-            //     () => ModEntry.Instance.Localizations.Localize(["trait", "wild", "name"]),
-            //     () => ModEntry.Instance.Localizations.Localize(["trait", "wild", "description"]),
-			// 	key: "trait.wild"
-            // )
 	}
 }
 

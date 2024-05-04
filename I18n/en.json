@@ -40,6 +40,12 @@
             },
             "showCardText": "Added <c=cardtrait>wild</c> and <c=cardtrait>buoyant</c>!"
         },
+        "copyButWild": {
+            "name": "make a wild copy",
+            "description": "Make a <c=cardtrait>wild</c> copy of a card.",
+            "cardSelectText": "Select a card to make a <c=cardtrait>wild</c> copy of.",
+            "showCardText": "Wild copy made!"
+        },
         "energySet": {
             "description": "Set your energy to <c=keyword>{{Amount}}</c>."
         }
@@ -82,7 +88,41 @@
         },
         "GenomeSplicing": {
             "name": "GENOME SPLICING",
-            "description": "Cards with an X value have it increased by the number of <c=cardtrait>wild</c> cards in your hand if they didn't already."
+            "description": "All cards with an X value are <c=cardtrait>wild</c> and have their X value increased by the number of <c=cardtrait>wild</c> cards in your hand if they didn't already."
+        }
+    },
+    "duoArtifact": {
+        "AimingReticle": {
+            "name": "AIMING RETICLE",
+            "description": "All of <c=peri>Peri's</c> card attacks deal bonus damage equal to your <c=status>X FACTOR</c> plus your <c=status>EXTREME MEASURES</c>. <c=downside>All <c=peri>Peri's</c> card attacks deal 1 less damage."
+        },
+        "SashaSnacks": {
+            "name": "SASHA SNACKS",
+            "description": "On the first turn, gain 1 <c=status>SHIELD</c> and 1 <c=status>MAX SHIELD</c> whenever you play a <c=cardtrait>wild</c> card."
+        },
+        "PartyBalloon": {
+            "name": "PARTY BALLOON",
+            "description": "On the first turn, draw an extra card for each <c=cardtrait>buoyant</c> card in your deck."
+        },
+        "PetRock": {
+            "name": "PET ROCK",
+            "description": "An <c=drone>asteroid</c> will always be near your ship at the start of combat. For each <c=drone>asteroid</c> in front of your ship, increase the value of X on all <c=cardtrait>wild</c> cards by 1."
+        },
+        "PirateMap": {
+            "name": "PIRATE MAP",
+            "description": "Whenever you <c=downside>overheat</c>, gain 1 <c=status>EXTREME MEASURES</c>."
+        },
+        "FunhouseMirror": {
+            "name": "FUNHOUSE MIRROR",
+            "description": "Choose a card in your deck. Create a <c=cardtrait>wild</c> copy of it."
+        },
+        "Druidism": {
+            "name": "DRUIDISM",
+            "description": "If you have at least 1 <c=status>SHARD</c>, the value of X on all <c=cardtrait>wild</c> cards is increased by 2. <c=downside>Lose 1 shard every time a wild card is played."
+        },
+        "VirtualPetSim": {
+            "name": "VIRTUAL PET SIM",
+            "description": "<c=cardtrait>Temporary</c> cards are <c=cardtrait>wild</c>."
         }
     },
     "card": {
