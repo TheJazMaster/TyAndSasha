@@ -1005,7 +1005,9 @@ internal sealed class PredationCard : Card, IHasCustomCardTraits, ITyCard
 
 internal sealed class ExtremeMeasuresCard : Card, ITyCard
 {
+	internal static Spr Sprite;
 	public static void Register(IModHelper helper) {
+		Sprite = helper.Content.Sprites.RegisterSprite(ModEntry.Instance.Package.PackageRoot.GetRelativeFile("Sprites/Cards/ExtremeMeasures.png")).Sprite;
 		helper.Content.Cards.RegisterCard("ExtremeMeasures", new()
 		{
 			CardType = MethodBase.GetCurrentMethod()!.DeclaringType!,
@@ -1015,7 +1017,7 @@ internal sealed class ExtremeMeasuresCard : Card, ITyCard
 				rarity = Rarity.rare,
 				upgradesTo = [Upgrade.A, Upgrade.B]
 			},
-			Art = helper.Content.Sprites.RegisterSprite(ModEntry.Instance.Package.PackageRoot.GetRelativeFile("Sprites/Cards/ExtremeMeasures.png")).Sprite,
+			Art = Sprite,
 			Name = ModEntry.Instance.AnyLocalizations.Bind(["card", "ExtremeMeasures", "name"]).Localize
 		});
 	}
@@ -1238,3 +1240,64 @@ internal sealed class FetchCard : Card, IHasCustomCardTraits, ITyCard
 		]
 	};
 }
+
+
+internal sealed class TyExeCard : Card, ITyCard
+{
+	public static void Register(IModHelper helper) {
+		helper.Content.Cards.RegisterCard("TyExe", new()
+		{
+			CardType = MethodBase.GetCurrentMethod()!.DeclaringType!,
+			Meta = new()
+			{
+				deck = Deck.colorless,
+				rarity = Rarity.common,
+				upgradesTo = [Upgrade.A, Upgrade.B]
+			},
+			Art = ExtremeMeasuresCard.Sprite,
+			Name = ModEntry.Instance.AnyLocalizations.Bind(["card", "TyExe", "name"]).Localize
+		});
+	}
+
+	public override CardData GetData(State state) => new() {
+		cost = upgrade == Upgrade.A ? 0 : 1,
+		exhaust = true,
+		description = ColorlessLoc.GetDesc(state, upgrade == Upgrade.B ? 3 : 2, ModEntry.Instance.TyDeck.Deck),
+		artTint = "ffffff"
+    };
+
+	public override List<CardAction> GetActions(State s, Combat c)
+    {
+		Deck deck = ModEntry.Instance.TyDeck.Deck;
+		return upgrade switch
+		{
+			Upgrade.B => [
+				new ACardOffering
+				{
+					amount = 3,
+					limitDeck = deck,
+					makeAllCardsTemporary = true,
+					overrideUpgradeChances = false,
+					canSkip = false,
+					inCombat = true,
+					discount = -1,
+					dialogueSelector = ".summonTy"
+				}
+			],
+			_ => [
+				new ACardOffering
+				{
+					amount = 2,
+					limitDeck = deck,
+					makeAllCardsTemporary = true,
+					overrideUpgradeChances = false,
+					canSkip = false,
+					inCombat = true,
+					discount = -1,
+					dialogueSelector = ".summonTy"
+				}
+			],
+		};
+	}
+}
+

@@ -83,7 +83,7 @@ public sealed class ModEntry : SimpleMod {
 		=> StarterCardTypes
 			.Concat(CommonCardTypes)
 			.Concat(UncommonCardTypes)
-			.Concat(RareCardTypes);
+			.Concat(RareCardTypes).AddItem(typeof(TyExeCard));
 
     internal static IReadOnlyList<Type> CommonArtifacts { get; } = [
 		typeof(LycanthropyArtifact),
@@ -144,7 +144,8 @@ public sealed class ModEntry : SimpleMod {
 			Definition = new()
 			{
 				icon = helper.Content.Sprites.RegisterSprite(package.PackageRoot.GetRelativeFile("Sprites/Icons/XFactor.png")).Sprite,
-				color = new("d83273")
+				color = new("d83273"),
+				isGood = true
 			},
 			Name = AnyLocalizations.Bind(["status", "XFactor", "name"]).Localize,
 			Description = AnyLocalizations.Bind(["status", "XFactor", "description"]).Localize
@@ -155,7 +156,8 @@ public sealed class ModEntry : SimpleMod {
 			Definition = new()
 			{
 				icon = helper.Content.Sprites.RegisterSprite(package.PackageRoot.GetRelativeFile("Sprites/Icons/ExtremeMeasures.png")).Sprite,
-				color = new("d83273")
+				color = new("d83273"),
+				isGood = true
 			},
 			Name = AnyLocalizations.Bind(["status", "ExtremeMeasures", "name"]).Localize,
 			Description = AnyLocalizations.Bind(["status", "ExtremeMeasures", "description"]).Localize
@@ -166,7 +168,8 @@ public sealed class ModEntry : SimpleMod {
 			Definition = new()
 			{
 				icon = helper.Content.Sprites.RegisterSprite(package.PackageRoot.GetRelativeFile("Sprites/Icons/Predation.png")).Sprite,
-				color = new("c82424")
+				color = new("c82424"),
+				isGood = true
 			},
 			Name = AnyLocalizations.Bind(["status", "Predation", "name"]).Localize,
 			Description = AnyLocalizations.Bind(["status", "Predation", "description"]).Localize
@@ -206,6 +209,7 @@ public sealed class ModEntry : SimpleMod {
 			Starters = new StarterDeck {
 				cards = [ new TreatCard(), new BiteCard() ],
 			},
+			ExeCardType = typeof(TyExeCard),
 			NeutralAnimation = new()
 			{
 				Deck = TyDeck.Deck,

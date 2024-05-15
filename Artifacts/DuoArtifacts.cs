@@ -345,7 +345,7 @@ internal sealed class VirtualPetSimArtifact : Artifact, ITyArtifact
 			Name = ModEntry.Instance.AnyLocalizations.Bind(["duoArtifact", "VirtualPetSim", "name"]).Localize,
 			Description = ModEntry.Instance.AnyLocalizations.Bind(["duoArtifact", "VirtualPetSim", "description"]).Localize
 		});
-		ModEntry.Instance.DuoArtifactsApi.RegisterDuoArtifact<VirtualPetSimArtifact>([Deck.shard, ModEntry.Instance.TyDeck.Deck]);
+		ModEntry.Instance.DuoArtifactsApi.RegisterDuoArtifact<VirtualPetSimArtifact>([Deck.catartifact, ModEntry.Instance.TyDeck.Deck]);
 	}
 
 	public int AffectX(Card card, List<CardAction> actions, State s, Combat c, int xBonus)
