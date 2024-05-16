@@ -348,26 +348,6 @@ internal sealed class VirtualPetSimArtifact : Artifact, ITyArtifact
 		ModEntry.Instance.DuoArtifactsApi.RegisterDuoArtifact<VirtualPetSimArtifact>([Deck.catartifact, ModEntry.Instance.TyDeck.Deck]);
 	}
 
-	public int AffectX(Card card, List<CardAction> actions, State s, Combat c, int xBonus)
-	{
-		if (Cards!.IsCardTraitActive(s, card, WildManager.WildTrait)) {
-			return 2;
-		}
-		return 0;
-	}
-
-	public override void OnPlayerPlayCard(int energyCost, Deck deck, Card card, State state, Combat combat, int handPosition, int handCount)
-	{
-		if (Cards!.IsCardTraitActive(state, card, WildManager.WildTrait)) {
-			combat.Queue(new AStatus {
-				status = Status.shard,
-				statusAmount = -1,
-				targetPlayer = true,
-				artifactPulse = Key()
-			});
-		}
-	}
-
 	public override List<Tooltip>? GetExtraTooltips() => [
 		.. Cards!.TemporaryCardTrait.Configuration.Tooltips!(MG.inst.g.state, null),
 		.. WildManager.WildTrait.Configuration.Tooltips!(MG.inst.g.state, null)
