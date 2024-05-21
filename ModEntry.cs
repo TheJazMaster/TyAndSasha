@@ -128,7 +128,6 @@ public sealed class ModEntry : SimpleMod {
 			new CurrentLocaleOrEnglishLocalizationProvider<IReadOnlyList<string>>(AnyLocalizations)
 		);
 
-
 		WildManager = new WildManager();
 		_ = new CardBrowseFilterManager();
 		_ = new XAffectorManager();

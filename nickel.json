@@ -18,5 +18,13 @@
             "UniqueName": "Shockah.DuoArtifacts",
             "IsRequired": false
         }
-    ]
+    ],
+    "UpdateChecks": {
+          "NexusMods": {
+              "ID": 7
+          },
+          "GitHub": {
+              "Repository": "TheJazMaster/TyAndSasha"
+          }
+      }
 }
