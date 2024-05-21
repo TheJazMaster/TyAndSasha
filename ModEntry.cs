@@ -120,11 +120,6 @@ public sealed class ModEntry : SimpleMod {
 		KokoroApi = helper.ModRegistry.GetApi<IKokoroApi>("Shockah.Kokoro")!;
 		DuoArtifactsApi = helper.ModRegistry.GetApi<IDuoArtifactsApi>("Shockah.DuoArtifacts");
 
-		WildManager = new WildManager();
-		_ = new CardBrowseFilterManager();
-		_ = new XAffectorManager();
-		_ = new StatusManager();
-
 		AnyLocalizations = new JsonLocalizationProvider(
 			tokenExtractor: new SimpleLocalizationTokenExtractor(),
 			localeStreamFunction: locale => package.PackageRoot.GetRelativeFile($"I18n/{locale}.json").OpenRead()
@@ -133,6 +128,11 @@ public sealed class ModEntry : SimpleMod {
 			new CurrentLocaleOrEnglishLocalizationProvider<IReadOnlyList<string>>(AnyLocalizations)
 		);
 
+
+		WildManager = new WildManager();
+		_ = new CardBrowseFilterManager();
+		_ = new XAffectorManager();
+		_ = new StatusManager();
 
         TyPortrait = helper.Content.Sprites.RegisterSprite(package.PackageRoot.GetRelativeFile("Sprites/Character/Ty_neutral_0.png"));
         TyPortraitMini = helper.Content.Sprites.RegisterSprite(package.PackageRoot.GetRelativeFile("Sprites/Character/Ty_mini.png"));
