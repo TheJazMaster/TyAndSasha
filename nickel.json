@@ -1,6 +1,6 @@
 {
     "UniqueName": "TheJazMaster.TyAndSasha",
-    "Version": "1.1.2",
+    "Version": "1.1.3",
     "RequiredApiVersion": "0.1.0",
     "EntryPointAssembly": "TyAndSasha.dll",
     "LoadPhase": "AfterDbInit",
@@ -20,11 +20,11 @@
         }
     ],
     "UpdateChecks": {
-          "NexusMods": {
-              "ID": 7
-          },
-          "GitHub": {
-              "Repository": "TheJazMaster/TyAndSasha"
-          }
-      }
+        "NexusMods": {
+            "ID": 7
+        },
+        "GitHub": {
+            "Repository": "TheJazMaster/TyAndSasha"
+        }
+    }
 }
