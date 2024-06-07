@@ -15,7 +15,6 @@ public class AMakeWildAndBuoyant : CardAction
 	{
         if (selectedCard != null) {
             ModEntry.Instance.Helper.Content.Cards.SetCardTraitOverride(s, selectedCard, WildManager.WildTrait, true, permanent);
-		    // ModEntry.Instance.WildManager.SetWild(selectedCard, true, permanent);
             selectedCard.buoyantOverride = true;
             if (permanent)
                 selectedCard.buoyantOverrideIsPermanent = permanent;
@@ -48,15 +47,7 @@ public class AMakeWildAndBuoyant : CardAction
                 Title = ModEntry.Instance.Localizations.Localize(["action", "makeWildAndBuoyant", "name"]),
                 Description = ModEntry.Instance.Localizations.Localize(["action", "makeWildAndBuoyant", "description"], new { Duration = GetDuration() })
 			},
-            // new CustomTTGlossary(
-            //     CustomTTGlossary.GlossaryType.cardtrait,
-            //     () => ModEntry.Instance.WildIcon.Sprite,
-            //     () => ModEntry.Instance.Localizations.Localize(["trait", "wild", "name"]),
-            //     () => ModEntry.Instance.Localizations.Localize(["trait", "wild", "description"]),
-			// 	key: "trait.wild"
-            // ),
             .. WildManager.WildTrait.Configuration.Tooltips!(s, selectedCard),
-            // new TTGlossary("cardtrait.buoyant")
         ];
 	}
 

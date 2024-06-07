@@ -3,7 +3,7 @@
         "name": "Ty & Sasha",
         "description": [
             "<c=FF6895>TY & SASHA</c>",
-            "Your zoologist. Studies animals like his pet, Sasha, to learn new battle strategies. Specializes in <c=keyword>X values</c> and <c=keyword>wild cards</c>, which have self-synergy."
+            "Your zoologist. Studied and trained in the way of the beast, thanks in part to his pal Sasha. His cards prioritize <c=keyword>X values</c>, and <c=keyword>self-synergizing wild cards.</c>"
         ]
     },
     "trait": {
@@ -158,9 +158,9 @@
         "Fetch": {
             "name": "Fetch",
             "description": {
-                "None": "Choose 2 <c=cardtrait>wild</c> cards in your <c=keyword>draw pile</c>. Put them in your hand.",
-                "A": "Choose 3 <c=cardtrait>wild</c> cards in your <c=keyword>draw pile</c>. Put them in your hand.",
-                "B": "Choose a <c=cardtrait>wild</c> card in your <c=keyword>draw pile</c>. Put it in your hand."
+                "None": "Choose a <c=cardtrait>wild</c> card in your <c=keyword>draw pile</c>. Put it in your hand.",
+                "A": "Choose 2 <c=cardtrait>wild</c> cards in your <c=keyword>draw pile</c>. Put them in your hand.",
+                "B": "Draw every <c=cardtrait>wild</c> card in your <c=keyword>draw pile</c>."
             }
         },
         "Hibernate": {

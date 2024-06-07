@@ -388,29 +388,41 @@ internal sealed class PotShotCard : Card, IHasCustomCardTraits, ITyCard
 	public override CardData GetData(State state) => new() {
 		cost = 0,
 		exhaust = true,
-		art = upgrade == Upgrade.A ? CardArtA : CardArt,
+		art = upgrade == Upgrade.B ? CardArtA : CardArt,
 		buoyant = true,
 		artTint = "ffffff"
 	};
 
 	public IReadOnlySet<ICardTraitEntry> GetInnateTraits(State state) => upgrade switch {
-		Upgrade.A => [WildManager.WildTrait],
+		Upgrade.B => [WildManager.WildTrait],
 		_ => new HashSet<ICardTraitEntry>()
 	};
 
 	public override List<CardAction> GetActions(State s, Combat c) => upgrade switch
 	{
+		Upgrade.A => [
+			new AAttack {
+				damage = GetDmg(s, 5)
+			},
+			new AStatus {
+				status = Status.tempShield,
+				statusAmount = 1,
+				targetPlayer = true
+			},
+		],
 		Upgrade.B => [
+			new AVariableHintWild(),
 			new AAttack {
 				damage = GetDmg(s, 4)
 			},
-			new ADrawCard {
-				count = 1
-			}
+			new AAttack {
+				damage = GetDmg(s, WildManager.CountWildsInHand(s, c)),
+				xHint = 1
+			},
 		],
 		_ => [
 			new AAttack {
-				damage = GetDmg(s, upgrade == Upgrade.A ? 5 : 4)
+				damage = GetDmg(s, 4)
 			},
 		]
 	};
@@ -851,27 +863,6 @@ internal sealed class CurlUpCard : Card, IHasCustomCardTraits, ITyCard
 		var amt = WildManager.CountWildsInHand(s, c);
 		return upgrade switch {
 			Upgrade.A => [
-				new AStatus {
-					status = ModEntry.Instance.XFactorStatus.Status,
-					statusAmount = 1,
-					targetPlayer = true
-				},
-				new AVariableHintWild {
-					displayAdjustment = 1
-				}.ApplyModData(XAffectorManager.InnateIncreasedHintsKey, 1),
-				new AStatus {
-					status = Status.shield,
-					statusAmount = amt + 1,
-					targetPlayer = true,
-					xHint = 1
-				},
-				new AStatus {
-					status = Status.shield,
-					statusAmount = 1,
-					targetPlayer = true
-				}
-			],
-			Upgrade.B => [
 				new AVariableHintWild(),
 				new AStatus {
 					status = Status.shield,
@@ -880,23 +871,43 @@ internal sealed class CurlUpCard : Card, IHasCustomCardTraits, ITyCard
 					xHint = 1
 				},
 				new AStatus {
-					status = ModEntry.Instance.XFactorStatus.Status,
+					status = Status.tempShield,
+					statusAmount = amt,
+					targetPlayer = true,
+					xHint = 1
+				},
+				new AStatus {
+					status = Status.tempShield,
 					statusAmount = 2,
 					targetPlayer = true
 				}
 			],
-			_ => [
+			Upgrade.B => [
+				new AVariableHintWild(),
 				new AStatus {
-					status = ModEntry.Instance.XFactorStatus.Status,
-					statusAmount = 1,
-					targetPlayer = true
+					status = Status.maxShield,
+					statusAmount = amt,
+					targetPlayer = true,
+					xHint = 1
 				},
-				new AVariableHintWild {
-					displayAdjustment = 1
-				}.ApplyModData(XAffectorManager.InnateIncreasedHintsKey, 1),
+				new AStatus {
+					status = Status.tempShield,
+					statusAmount = amt,
+					targetPlayer = true,
+					xHint = 1
+				}
+			],
+			_ => [
+				new AVariableHintWild(),
 				new AStatus {
 					status = Status.shield,
-					statusAmount = amt + 1,
+					statusAmount = amt,
+					targetPlayer = true,
+					xHint = 1
+				},
+				new AStatus {
+					status = Status.tempShield,
+					statusAmount = amt,
 					targetPlayer = true,
 					xHint = 1
 				}
@@ -1188,7 +1199,8 @@ internal sealed class FetchCard : Card, IHasCustomCardTraits, ITyCard
 	}
 
 	public override CardData GetData(State state) => new() {
-		cost = upgrade == Upgrade.B ? 0 : 1,
+		cost = 0,
+		exhaust = upgrade == Upgrade.B,
 		description = ModEntry.Instance.Localizations.Localize(["card", "Fetch", "description", upgrade.ToString()]),
 		artTint = "ffffff"
 	};
@@ -1208,29 +1220,12 @@ internal sealed class FetchCard : Card, IHasCustomCardTraits, ITyCard
 				browseAction = new ChooseCardToPutInHand(),
 				browseSource = CardBrowse.Source.DrawPile,
 				filterUUID = uuid
-			}.ApplyModData(CardBrowseFilterManager.FilterWildKey, true),
-			new ACardSelectImproved
-			{
-				browseAction = new ChooseCardToPutInHand(),
-				browseSource = CardBrowse.Source.DrawPile,
-				filterUUID = uuid
 			}.ApplyModData(CardBrowseFilterManager.FilterWildKey, true)
 		],
 		Upgrade.B => [
-			new ACardSelectImproved
-			{
-				browseAction = new ChooseCardToPutInHand(),
-				browseSource = CardBrowse.Source.DrawPile,
-				filterUUID = uuid
-			}.ApplyModData(CardBrowseFilterManager.FilterWildKey, true)
+			new ADrawAllWilds()
 		],
 		_ => [
-			new ACardSelectImproved
-			{
-				browseAction = new ChooseCardToPutInHand(),
-				browseSource = CardBrowse.Source.DrawPile,
-				filterUUID = uuid
-			}.ApplyModData(CardBrowseFilterManager.FilterWildKey, true),
 			new ACardSelectImproved
 			{
 				browseAction = new ChooseCardToPutInHand(),
