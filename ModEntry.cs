@@ -29,7 +29,7 @@ public sealed class ModEntry : SimpleMod {
 	internal ILocalizationProvider<IReadOnlyList<string>> AnyLocalizations { get; }
 	internal ILocaleBoundNonNullLocalizationProvider<IReadOnlyList<string>> Localizations { get; }
 
-    internal ICharacterEntry TyCharacter { get; }
+    internal IPlayableCharacterEntryV2 TyCharacter { get; }
 
     internal IDeckEntry TyDeck { get; }
 
@@ -200,7 +200,7 @@ public sealed class ModEntry : SimpleMod {
             }
         });
 
-        TyCharacter = helper.Content.Characters.RegisterCharacter("TyAndSasha", new()
+        TyCharacter = helper.Content.Characters.V2.RegisterPlayableCharacter("TyAndSasha", new()
 		{
 			Deck = TyDeck.Deck,
 			Description = AnyLocalizations.Bind(["character", "description"]).Localize,
@@ -211,7 +211,7 @@ public sealed class ModEntry : SimpleMod {
 			ExeCardType = typeof(TyExeCard),
 			NeutralAnimation = new()
 			{
-				Deck = TyDeck.Deck,
+				CharacterType = TyDeck.Deck.Key(),
 				LoopTag = "neutral",
 				Frames = [
 					TyPortrait.Sprite
@@ -219,7 +219,7 @@ public sealed class ModEntry : SimpleMod {
 			},
 			MiniAnimation = new()
 			{
-				Deck = TyDeck.Deck,
+				CharacterType = TyDeck.Deck.Key(),
 				LoopTag = "mini",
 				Frames = [
 					TyPortraitMini.Sprite
@@ -227,22 +227,22 @@ public sealed class ModEntry : SimpleMod {
 			}
 		});
 
-		helper.Content.Characters.RegisterCharacterAnimation("GameOver", new()
+		helper.Content.Characters.V2.RegisterCharacterAnimation("GameOver", new()
 		{
-			Deck = TyDeck.Deck,
+			CharacterType = TyDeck.Deck.Key(),
 			LoopTag = "gameover",
 			Frames = [TyPortrait.Sprite]
 		});
-		helper.Content.Characters.RegisterCharacterAnimation("Squint", new()
+		helper.Content.Characters.V2.RegisterCharacterAnimation("Squint", new()
 		{
-			Deck = TyDeck.Deck,
+			CharacterType = TyDeck.Deck.Key(),
 			LoopTag = "squint",
 			Frames = [TyPortrait.Sprite]
 		});
 
 
 		ICardTraitEntry TemporaryCardTrait = helper.Content.Cards.TemporaryCardTrait;
-		helper.Content.Cards.OnGetVolatileCardTraitOverrides += (_, data) => {
+		helper.Content.Cards.OnGetFinalDynamicCardTraitOverrides += (_, data) => {
 			State state = data.State;
 			if (state.route is Combat combat) {
 				WildManager.ignoreCount = true;
@@ -251,7 +251,7 @@ public sealed class ModEntry : SimpleMod {
 						if (item is GenomeSplicingArtifact) {
 							foreach (CardAction action in data.Card.GetActions(state, combat)) {
 								if (action is AVariableHint && action is not AVariableHintWild) {
-									data.SetVolatileOverride(WildManager.WildTrait, true);
+									data.SetOverride(WildManager.WildTrait, true);
 									break;
 								}
 							}
@@ -261,7 +261,7 @@ public sealed class ModEntry : SimpleMod {
 				if (data.TraitStates[TemporaryCardTrait].IsActive) {
 					foreach (Artifact item in data.State.EnumerateAllArtifacts()) {
 						if (item is VirtualPetSimArtifact) {
-							data.SetVolatileOverride(WildManager.WildTrait, true);
+							data.SetOverride(WildManager.WildTrait, true);
 						}
 					}
 				}
