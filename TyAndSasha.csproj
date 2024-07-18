@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<RootNamespace>TheJazMaster.TyAndSasha</RootNamespace>
-		<Version>1.1.4</Version>
 		<IncludedModProjectPaths>I18n;Sprites</IncludedModProjectPaths>
 
 		<TargetFramework>net8.0</TargetFramework>
