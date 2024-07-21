@@ -191,6 +191,9 @@ internal sealed class PetRockArtifact : Artifact, ITyArtifact, IXAffectorArtifac
 
 	public int AffectX(Card card, List<CardAction> actions, State s, Combat c, int xBonus)
 	{
+		if (!WildManager.IsWild(card, s))
+			return 0;
+
 		int count = 0;
 		for (int i = 0; i < s.ship.parts.Count; i++) {
 			if (c.stuff.GetValueOrDefault(s.ship.x + i) is Asteroid) count++;

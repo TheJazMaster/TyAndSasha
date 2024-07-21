@@ -1,6 +1,6 @@
 {
     "UniqueName": "TheJazMaster.TyAndSasha",
-    "Version": "1.1.5",
+    "Version": "1.1.6",
     "RequiredApiVersion": "0.1.0",
     "EntryPointAssembly": "TyAndSasha.dll",
     "LoadPhase": "AfterDbInit",
