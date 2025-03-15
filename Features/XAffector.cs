@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using TheJazMaster.TyAndSasha.Artifacts;
 using TheJazMaster.TyAndSasha.Actions;
 using System.ComponentModel;
+using static TheJazMaster.TyAndSasha.ITyAndSashaApi;
 
 namespace TheJazMaster.TyAndSasha.Features;
 #nullable enable
@@ -19,6 +20,9 @@ namespace TheJazMaster.TyAndSasha.Features;
 public class XAffectorManager
 {
     private static IModData ModData => ModEntry.Instance.Helper.ModData;
+
+    private static readonly Pool<AffectXArgs> AffectXArgsPool = new(() => new());
+    private static readonly Pool<ApplyXBonusArgs> ApplyXBonusPool = new(() => new());
 
     internal static readonly string IncreasedHintsKey = "IncreasedHints";
     internal static readonly string InnateIncreasedHintsKey = "InnateIncreasedHints";
@@ -41,19 +45,23 @@ public class XAffectorManager
 			postfix: new HarmonyMethod(GetType(), nameof(AVariableHint_GetTooltips_Postfix))
 		);
     }
-    
+
     internal static int GetXBonus(Card card, List<CardAction> actions, State s, Combat c) {
-        int baseXBonus = 0;
-        foreach (Artifact item in s.EnumerateAllArtifacts()) {
-            if (item is IXAffectorArtifact xAffector) {
-                baseXBonus += xAffector.AffectX(card, actions, s, c, baseXBonus);
+        return AffectXArgsPool.Do(args => {
+            args.State = s;
+            args.Combat = c;
+            args.Actions = actions;
+            args.Amount = 0;
+            args.Card = card;
+				
+            foreach (IHook hook in ModEntry.Instance.HookManager.GetHooksWithProxies(ModEntry.Instance.Helper.Utilities.ProxyManager, s.EnumerateAllArtifacts())) {
+                args.Amount += hook.AffectX(args);
             }
-        }
-        baseXBonus += s.ship.Get(ModEntry.Instance.XFactorStatus.Status) + s.ship.Get(ModEntry.Instance.ExtremeMeasuresStatus.Status);
-        return baseXBonus;
+            return args.Amount;
+        });
     }
 
-    private static void ImproveActionX(CardAction action, int baseXBonus) {
+    private static void ImproveActionX(State s, CardAction action, int baseXBonus) {
         if (action is AVariableHint) {
             ModData.SetModData(action, IncreasedHintsKey, baseXBonus);
         }
@@ -62,30 +70,15 @@ public class XAffectorManager
             return;
 
         int xBonus = (int)xHint * baseXBonus;
-
-        if (action is AAttack attack) {
-            attack.damage += xBonus;
-        } else if (action is AStatus status) {
-            status.statusAmount += xBonus;
-        } else if (action is ADrawCard draw) {
-            draw.count += xBonus;
-        } else if (action is AEnergy energy) {
-            energy.changeAmount += xBonus;
-        } else if (action is AAddCard add) {
-            add.amount += xBonus;
-        } else if (action is ADiscard discard) {
-            discard.count += xBonus;
-        } else if (action is AHeal heal) {
-            heal.healAmount += xBonus;
-        } else if (action is AHurt hurt) {
-            hurt.hurtAmount += xBonus;
-        } else if (action is AMove move) {
-            if (move.dir > 0) {
-                move.dir += xBonus;
-            } else {
-                move.dir -= xBonus;
+        ApplyXBonusPool.Do(args => {
+            args.State = s;
+            args.Action = action;
+            args.Bonus = xBonus;
+			
+            foreach (IHook hook in ModEntry.Instance.HookManager.GetHooksWithProxies(ModEntry.Instance.Helper.Utilities.ProxyManager, s.EnumerateAllArtifacts())) {
+                if (hook.ApplyXBonus(args)) break;
             }
-        }
+        });
     }
 
     private static void Card_GetActionsOverridden_Postfix(Card __instance, ref List<CardAction> __result, State s, Combat c) {
@@ -94,7 +87,7 @@ public class XAffectorManager
 
         foreach (CardAction wrappedAction in __result) {
             foreach (CardAction action in ModEntry.Instance.KokoroApi.Actions.GetWrappedCardActionsRecursively(wrappedAction, false)) {
-                ImproveActionX(action, baseXBonus);
+                ImproveActionX(s, action, baseXBonus);
             }
         }
     }
@@ -236,5 +229,19 @@ public class XAffectorManager
                 glossary.vals[^1] = last + " + " + (value + innate);
             }
         }
+    }
+
+    private sealed class AffectXArgs : IHook.IAffectXArgs {
+        public State State { get; set; } = null!;
+        public Combat Combat { get; set; } = null!;
+        public Card Card { get; set; } = null!;
+        public List<CardAction> Actions { get; set; } = null!;
+        public int Amount { get; set; }
+    }
+
+    private sealed class ApplyXBonusArgs : IHook.IApplyXBonusArgs {
+        public State State { get; set; } = null!;
+        public CardAction Action { get; set; } = null!;
+        public int Bonus { get; set; }
     }
 }

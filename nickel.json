@@ -1,6 +1,6 @@
 {
     "UniqueName": "TheJazMaster.TyAndSasha",
-    "Version": "1.1.6",
+    "Version": "1.2.3",
     "RequiredApiVersion": "0.1.0",
     "EntryPointAssembly": "TyAndSasha.dll",
     "LoadPhase": "AfterDbInit",
@@ -12,6 +12,11 @@
         {
             "UniqueName": "TheJazMaster.MoreDifficulties",
             "Version": "1.3.0",
+            "IsRequired": false
+        },
+        {
+            "UniqueName": "TheJazMaster.Louis",
+            "Version": "1.0.12",
             "IsRequired": false
         },
         {

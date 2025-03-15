@@ -31,7 +31,7 @@ internal sealed class AimingReticleArtifact : Artifact, ITyArtifact
 	public override int ModifyBaseDamage(int baseDamage, Card? card, State state, Combat? combat, bool fromPlayer)
 	{
 		if (card != null && card.GetMeta().deck == Deck.peri) {
-			return state.ship.Get(ModEntry.Instance.XFactorStatus.Status) + state.ship.Get(ModEntry.Instance.ExtremeMeasuresStatus.Status) - 1;
+			return (state.ship.Get(ModEntry.Instance.XFactorStatus.Status) + state.ship.Get(ModEntry.Instance.ExtremeMeasuresStatus.Status)) / 2;
 		}
 		return 0;
 	}
@@ -144,7 +144,7 @@ internal sealed class PartyBalloonArtifact : Artifact, ITyArtifact
 }
 
 
-internal sealed class PetRockArtifact : Artifact, ITyArtifact, IXAffectorArtifact
+internal sealed class PetRockArtifact : Artifact, ITyArtifact, ITyAndSashaApi.IHook
 {
 	public static void Register(IModHelper helper)
 	{
@@ -189,8 +189,9 @@ internal sealed class PetRockArtifact : Artifact, ITyArtifact, IXAffectorArtifac
 		}
 	}
 
-	public int AffectX(Card card, List<CardAction> actions, State s, Combat c, int xBonus)
+	public int AffectX(ITyAndSashaApi.IHook.IAffectXArgs args)
 	{
+		(Combat c, State s, Card card) = (args.Combat, args.State, args.Card);
 		if (!WildManager.IsWild(card, s))
 			return 0;
 
@@ -280,7 +281,7 @@ internal sealed class FunhouseMirrorArtifact : Artifact, ITyArtifact
 }
 
 
-internal sealed class DruidismArtifact : Artifact, ITyArtifact, IXAffectorArtifact
+internal sealed class DruidismArtifact : Artifact, ITyArtifact, ITyAndSashaApi.IHook
 {
 	internal static IModCards? Cards;
 	public static void Register(IModHelper helper)
@@ -302,8 +303,9 @@ internal sealed class DruidismArtifact : Artifact, ITyArtifact, IXAffectorArtifa
 		ModEntry.Instance.DuoArtifactsApi.RegisterDuoArtifact<DruidismArtifact>([Deck.shard, ModEntry.Instance.TyDeck.Deck]);
 	}
 
-	public int AffectX(Card card, List<CardAction> actions, State s, Combat c, int xBonus)
+	public int AffectX(ITyAndSashaApi.IHook.IAffectXArgs args)
 	{
+		(State s, Card card) = (args.State, args.Card);
 		if (s.ship.Get(Status.shard) > 0 && Cards!.IsCardTraitActive(s, card, WildManager.WildTrait)) {
 			return 2;
 		}
@@ -353,6 +355,33 @@ internal sealed class VirtualPetSimArtifact : Artifact, ITyArtifact
 
 	public override List<Tooltip>? GetExtraTooltips() => [
 		.. Cards!.TemporaryCardTrait.Configuration.Tooltips!(MG.inst.g.state, null),
+		.. WildManager.WildTrait.Configuration.Tooltips!(MG.inst.g.state, null)
+	];
+}
+
+
+internal sealed class TigersEyeArtifact : Artifact, ITyArtifact
+{
+	public static void Register(IModHelper helper)
+	{
+		if (ModEntry.Instance.DuoArtifactsApi == null || ModEntry.Instance.LouisApi == null) return;
+		
+		helper.Content.Artifacts.RegisterArtifact("TigersEye", new()
+		{
+			ArtifactType = MethodBase.GetCurrentMethod()!.DeclaringType!,
+			Meta = new()
+			{
+				owner = ModEntry.Instance.DuoArtifactsApi.DuoArtifactVanillaDeck
+			},
+			Sprite = helper.Content.Sprites.RegisterSprite(ModEntry.Instance.Package.PackageRoot.GetRelativeFile("Sprites/DuoArtifacts/TigersEye.png")).Sprite,
+			Name = ModEntry.Instance.AnyLocalizations.Bind(["duoArtifact", "TigersEye", "name"]).Localize,
+			Description = ModEntry.Instance.AnyLocalizations.Bind(["duoArtifact", "TigersEye", "description"]).Localize
+		});
+		ModEntry.Instance.DuoArtifactsApi.RegisterDuoArtifact<TigersEyeArtifact>([ModEntry.Instance.LouisApi.LouisDeck, ModEntry.Instance.TyDeck.Deck]);
+	}
+
+	public override List<Tooltip>? GetExtraTooltips() => [
+		.. ModEntry.Instance.LouisApi!.GemTrait.Configuration.Tooltips!(DB.fakeState, null),
 		.. WildManager.WildTrait.Configuration.Tooltips!(MG.inst.g.state, null)
 	];
 }

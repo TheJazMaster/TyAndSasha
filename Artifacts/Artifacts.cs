@@ -81,14 +81,11 @@ internal sealed class NaturalTalentArtifact : Artifact, ITyArtifact
 	public override void OnReceiveArtifact(State state)
 	{
 		state.GetCurrentQueue().QueueImmediate(
-			new ACardSelect
-			{
-				browseAction = new AMakeWildAndBuoyant {
-					permanent = true,
-					showCard = true
-				},
-				browseSource = CardBrowse.Source.Deck
-			}.ApplyModData(CardBrowseFilterManager.FilterWildAndBuoyantKey, false)
+			new ACardSelect {
+				browseAction = new CardSelectAddBuoyantForever(),
+				browseSource = CardBrowse.Source.Deck,
+				filterBuoyant = false
+			}
 		);
 	}
 
@@ -140,7 +137,7 @@ internal sealed class ChewToyArtifact : Artifact, ITyArtifact
 
 internal sealed class BabyStarnacleArtifact : Artifact, ITyArtifact
 {
-	bool active = false;
+	public bool active = false;
 
 	public static void Register(IModHelper helper)
 	{
@@ -198,7 +195,7 @@ internal sealed class BabyStarnacleArtifact : Artifact, ITyArtifact
 
 internal sealed class ScratchingPostArtifact : Artifact, ITyArtifact
 {
-	bool turnedOn = true;
+	public bool turnedOn = true;
 
 	static Spr ActiveSprite;
 	static Spr InactiveSprite;
@@ -264,7 +261,7 @@ internal sealed class ScratchingPostArtifact : Artifact, ITyArtifact
 }
 
 
-internal sealed class GenomeSplicingArtifact : Artifact, ITyArtifact, IXAffectorArtifact
+internal sealed class GenomeSplicingArtifact : Artifact, ITyArtifact, ITyAndSashaApi.IHook
 {
 	public static void Register(IModHelper helper)
 	{
@@ -282,11 +279,11 @@ internal sealed class GenomeSplicingArtifact : Artifact, ITyArtifact, IXAffector
 		});
 	}
 
-	public int AffectX(Card card, List<CardAction> actions, State s, Combat c, int xBonus)
+	public int AffectX(ITyAndSashaApi.IHook.IAffectXArgs args)
 	{
-		foreach(CardAction action in actions) {
+		foreach(CardAction action in args.Actions) {
 			if (action is AVariableHint && action is not AVariableHintWild) {
-				return WildManager.CountWildsInHand(s, c);
+				return WildManager.CountWildsInHand(args.State, args.Combat);
 			}
 		}
 		return 0;

@@ -4,6 +4,7 @@ using System.Linq;
 using daisyowl.text;
 using FSPRO;
 
+#nullable disable
 namespace TheJazMaster.TyAndSasha;
 
 public class CustomShowCards : ShowCards

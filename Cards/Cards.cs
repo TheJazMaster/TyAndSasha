@@ -3,11 +3,12 @@ using TheJazMaster.TyAndSasha.Actions;
 using System.Collections.Generic;
 using System.Reflection;
 using TheJazMaster.TyAndSasha.Features;
+using System.Text;
 
 namespace TheJazMaster.TyAndSasha.Cards;
 
 
-internal sealed class TreatCard : Card, ITyCard
+internal sealed class TreatCard : Card, IHasCustomCardTraits, ITyCard
 {
 	public static void Register(IModHelper helper) {
 		helper.Content.Cards.RegisterCard("Treat", new()
@@ -24,62 +25,28 @@ internal sealed class TreatCard : Card, ITyCard
 		});
 	}
 
+	public IReadOnlySet<ICardTraitEntry> GetInnateTraits(State state) => upgrade == Upgrade.A ? new HashSet<ICardTraitEntry>() { HeavyManager.HeavyTrait } : [];
+
 	public override CardData GetData(State state) => new() {
-		cost = upgrade == Upgrade.B ? 2 : 1,
+		cost = 1,
+		exhaust = upgrade == Upgrade.B,
 		artTint = "ffffff"
 	};
 
-	public override List<CardAction> GetActions(State s, Combat c) => upgrade switch
-	{
-		Upgrade.A => [
-			new AStatus
-			{
-				status = Status.shield,
-				statusAmount = 2,
-				targetPlayer = true
-			},
-			new AStatus
-			{
-				status = ModEntry.Instance.XFactorStatus.Status,
-				statusAmount = 1,
-				targetPlayer = true
-			}
-		],
-		Upgrade.B => [
-			new AStatus
-			{
-				status = Status.shield,
-				statusAmount = 1,
-				targetPlayer = true
-			},
-			new AStatus
-			{
-				status = Status.tempShield,
-				statusAmount = 1,
-				targetPlayer = true
-			},
-			new AStatus
-			{
-				status = ModEntry.Instance.XFactorStatus.Status,
-				statusAmount = 2,
-				targetPlayer = true
-			}
-		],
-		_ => [
-			new AStatus
-			{
-				status = Status.shield,
-				statusAmount = 1,
-				targetPlayer = true
-			},
-			new AStatus
-			{
-				status = ModEntry.Instance.XFactorStatus.Status,
-				statusAmount = 1,
-				targetPlayer = true
-			}
-		],
-	};
+	public override List<CardAction> GetActions(State s, Combat c) => [
+		new AStatus
+		{
+			status = Status.evade,
+			statusAmount = upgrade == Upgrade.B ? 2 : 1,
+			targetPlayer = true
+		},
+		new AStatus
+		{
+			status = ModEntry.Instance.XFactorStatus.Status,
+			statusAmount = upgrade == Upgrade.B ? 2 : 1,
+			targetPlayer = true
+		}
+	];
 }
 
 
@@ -104,39 +71,313 @@ internal sealed class BiteCard : Card, IHasCustomCardTraits, ITyCard
 		cost = 1,
 		artTint = "ffffff"
 	};
+	public IReadOnlySet<ICardTraitEntry> GetInnateTraits(State state) => upgrade == Upgrade.A ? 
+		new HashSet<ICardTraitEntry>() { WildManager.WildTrait, HeavyManager.HeavyTrait } : [ WildManager.WildTrait ];
+
+	public override List<CardAction> GetActions(State s, Combat c) => [
+		new AVariableHintWild(),
+		new AAttack {
+			damage = GetDmg(s, WildManager.CountWildsInHand(s, c)),
+			xHint = 1,
+			piercing = upgrade == Upgrade.B
+		}
+	];
+}
+
+
+internal sealed class HugsCard : Card, IHasCustomCardTraits, ITyCard
+{
+	public static void Register(IModHelper helper) {
+		helper.Content.Cards.RegisterCard("Hugs", new()
+		{
+			CardType = MethodBase.GetCurrentMethod()!.DeclaringType!,
+			Meta = new()
+			{
+				deck = ModEntry.Instance.TyDeck.Deck,
+				rarity = Rarity.common,
+				upgradesTo = [Upgrade.A, Upgrade.B]
+			},
+			Art = helper.Content.Sprites.RegisterSprite(ModEntry.Instance.Package.PackageRoot.GetRelativeFile("Sprites/Cards/Hugs.png")).Sprite,
+			Name = ModEntry.Instance.AnyLocalizations.Bind(["card", "Hugs", "name"]).Localize
+		});
+	}
+
+	public IReadOnlySet<ICardTraitEntry> GetInnateTraits(State state) => upgrade == Upgrade.None ? new HashSet<ICardTraitEntry>() { HeavyManager.HeavyTrait } : [];
+
+	public override CardData GetData(State state) => new() {
+		cost = 1,
+		retain = upgrade == Upgrade.A,
+		artTint = "ffffff"
+	};
+
+	public override List<CardAction> GetActions(State s, Combat c) => [
+		new AStatus {
+			status = ModEntry.Instance.XFactorStatus.Status,
+			statusAmount = upgrade == Upgrade.B ? 2 : 1,
+			targetPlayer = true
+		}
+	];
+}
+
+internal sealed class ZoomiesCard : Card, IHasCustomCardTraits, ITyCard
+{
+	public static void Register(IModHelper helper) {
+		helper.Content.Cards.RegisterCard("Zoomies", new()
+		{
+			CardType = MethodBase.GetCurrentMethod()!.DeclaringType!,
+			Meta = new()
+			{
+				deck = ModEntry.Instance.TyDeck.Deck,
+				rarity = Rarity.common,
+				upgradesTo = [Upgrade.A, Upgrade.B]
+			},
+			Art = helper.Content.Sprites.RegisterSprite(ModEntry.Instance.Package.PackageRoot.GetRelativeFile("Sprites/Cards/Zoomies.png")).Sprite,
+			Name = ModEntry.Instance.AnyLocalizations.Bind(["card", "Zoomies", "name"]).Localize
+		});
+	}
+
+	public override CardData GetData(State state) => new() {
+		cost = upgrade == Upgrade.A ? 0 : 1,
+		flippable = true,
+		artTint = "ffffff"
+	};
+
 	public IReadOnlySet<ICardTraitEntry> GetInnateTraits(State state) => new HashSet<ICardTraitEntry>() { WildManager.WildTrait };
+
+	public override List<CardAction> GetActions(State s, Combat c)
+	{
+		var amt = WildManager.CountWildsInHand(s, c);
+		return upgrade switch
+		{
+			Upgrade.B => [
+				new AVariableHintWild(),
+				new AMove {
+					dir = amt,
+					targetPlayer = true,
+					xHint = 1
+				},
+				new AStatus {
+					status = Status.evade,
+					statusAmount = 1,
+					targetPlayer = true
+				},
+			],
+			_ => [
+				new AVariableHintWild(),
+				new AMove {
+					dir = amt,
+					targetPlayer = true,
+					xHint = 1
+				},
+			]
+		};
+	}
+}
+
+internal sealed class PackBondCard : Card, ITyCard
+{
+	public static void Register(IModHelper helper) {
+		helper.Content.Cards.RegisterCard("PackBond", new()
+		{
+			CardType = MethodBase.GetCurrentMethod()!.DeclaringType!,
+			Meta = new()
+			{
+				deck = ModEntry.Instance.TyDeck.Deck,
+				rarity = Rarity.common,
+				upgradesTo = [Upgrade.A, Upgrade.B]
+			},
+			Art = helper.Content.Sprites.RegisterSprite(ModEntry.Instance.Package.PackageRoot.GetRelativeFile("Sprites/Cards/PackBond.png")).Sprite,
+			Name = ModEntry.Instance.AnyLocalizations.Bind(["card", "PackBond", "name"]).Localize
+		});
+	}
+
+	public override CardData GetData(State state) => new() {
+		cost = 2,
+		singleUse = true,
+		description = ModEntry.Instance.Localizations.Localize(["card", "PackBond", "description", upgrade.ToString()]),
+		artTint = "ffffff"
+	};
+
+	public override List<CardAction> GetActions(State s, Combat c) => [
+		new AAddCard {
+			destination = CardDestination.Hand,
+			card = new BiteCard {
+				upgrade = upgrade
+			}
+		},
+		new AAddCard {
+			destination = CardDestination.Hand,
+			card = new CurlUpCard {
+				upgrade = upgrade
+			}
+		}
+	];
+}
+
+internal sealed class PotShotCard : Card, IHasCustomCardTraits, ITyCard
+{
+	private static Spr CardArt;
+	private static Spr CardArtA;
+	public static void Register(IModHelper helper) {
+		CardArt = helper.Content.Sprites.RegisterSprite(ModEntry.Instance.Package.PackageRoot.GetRelativeFile("Sprites/Cards/PotShot.png")).Sprite;
+		CardArtA = helper.Content.Sprites.RegisterSprite(ModEntry.Instance.Package.PackageRoot.GetRelativeFile("Sprites/Cards/PotShotA.png")).Sprite;
+
+		helper.Content.Cards.RegisterCard("PotShot", new()
+		{
+			CardType = MethodBase.GetCurrentMethod()!.DeclaringType!,
+			Meta = new()
+			{
+				deck = ModEntry.Instance.TyDeck.Deck,
+				rarity = Rarity.common,
+				upgradesTo = [Upgrade.A, Upgrade.B]
+			},
+			Name = ModEntry.Instance.AnyLocalizations.Bind(["card", "PotShot", "name"]).Localize
+		});
+	}
+
+	public override CardData GetData(State state) => new() {
+		cost = upgrade == Upgrade.A ? 0 : 1,
+		exhaust = true,
+		art = upgrade == Upgrade.B ? CardArtA : CardArt,
+		buoyant = true,
+		artTint = "ffffff"
+	};
+
+	public IReadOnlySet<ICardTraitEntry> GetInnateTraits(State state) => upgrade switch {
+		Upgrade.B => [WildManager.WildTrait],
+		_ => new HashSet<ICardTraitEntry>()
+	};
 
 	public override List<CardAction> GetActions(State s, Combat c) => upgrade switch
 	{
-		Upgrade.A => [
+		Upgrade.B => [
 			new AVariableHintWild(),
+			new AAttack {
+				damage = GetDmg(s, 3)
+			},
 			new AAttack {
 				damage = GetDmg(s, WildManager.CountWildsInHand(s, c)),
 				xHint = 1
 			},
-			new AStatus
-			{
-				status = ModEntry.Instance.XFactorStatus.Status,
-				statusAmount = 1,
-				targetPlayer = true
-			}
-		],
-		Upgrade.B => [
-			new AVariableHintWild(),
-			new AAttack {
-				damage = GetDmg(s, WildManager.CountWildsInHand(s, c)),
-				piercing = true,
-				xHint = 1
-			}
 		],
 		_ => [
-			new AVariableHintWild(),
 			new AAttack {
-				damage = GetDmg(s, WildManager.CountWildsInHand(s, c)),
-				xHint = 1
-			}
+				damage = GetDmg(s, 4)
+			},
 		]
 	};
+}
+
+internal sealed class ReplicateCard : Card, IHasCustomCardTraits, ITyCard
+{
+	private static Spr CardArt;
+	private static Spr CardArtB;
+	public static void Register(IModHelper helper) {
+		CardArt = helper.Content.Sprites.RegisterSprite(ModEntry.Instance.Package.PackageRoot.GetRelativeFile("Sprites/Cards/Replicate.png")).Sprite;
+		CardArtB = helper.Content.Sprites.RegisterSprite(ModEntry.Instance.Package.PackageRoot.GetRelativeFile("Sprites/Cards/ReplicateB.png")).Sprite;
+
+		helper.Content.Cards.RegisterCard("Replicate", new()
+		{
+			CardType = MethodBase.GetCurrentMethod()!.DeclaringType!,
+			Meta = new()
+			{
+				deck = ModEntry.Instance.TyDeck.Deck,
+				rarity = Rarity.common,
+				upgradesTo = [Upgrade.A, Upgrade.B]
+			},
+			Art = CardArt,
+			Name = ModEntry.Instance.AnyLocalizations.Bind(["card", "Replicate", "name"]).Localize
+		});
+	}
+
+	public IReadOnlySet<ICardTraitEntry> GetInnateTraits(State state) => upgrade == Upgrade.B ? new HashSet<ICardTraitEntry>() { WildManager.WildTrait } : [];
+
+	public override CardData GetData(State state) => new() {
+		cost = 1,
+		art = upgrade == Upgrade.B ? CardArtB : CardArt,
+		artTint = "ffffff"
+	};
+
+	public int GetX(State s)
+	{
+		if (s.route is not Combat combat) return 0;
+		if (upgrade == Upgrade.B) {
+			return combat.hand.Count + WildManager.CountWildsInHand(s, combat) - 1;
+		}
+		return combat.hand.Count - 1;
+	}
+
+	public override List<CardAction> GetActions(State s, Combat c)
+	{
+		int x = GetX(s);
+		return upgrade switch
+		{
+			Upgrade.A => [
+				new AVariableHint {
+					hand = true,
+					handAmount = c.hand.Count - 1
+				},
+				new ADrawCard {
+					count = x,
+					xHint = 1
+				}
+			],
+			_ => [
+				upgrade == Upgrade.B ? new AVariableHintWild {
+					alsoHand = upgrade == Upgrade.B,
+					handCount = x
+				} : new AVariableHint {
+					hand = true,
+					handAmount = x
+				},
+				new ADrawCard {
+					count = x,
+					xHint = 1
+				},
+				new AStatus {
+					status = Status.drawLessNextTurn,
+					statusAmount = 1,
+					targetPlayer = true
+				},
+			]
+		};
+	}
+}
+
+internal sealed class PatOnTheBackCard : Card, IHasCustomCardTraits, ITyCard
+{
+	public static void Register(IModHelper helper) {
+		helper.Content.Cards.RegisterCard("PatOnTheBack", new()
+		{
+			CardType = MethodBase.GetCurrentMethod()!.DeclaringType!,
+			Meta = new()
+			{
+				deck = ModEntry.Instance.TyDeck.Deck,
+				rarity = Rarity.common,
+				upgradesTo = [Upgrade.A, Upgrade.B]
+			},
+			Art = helper.Content.Sprites.RegisterSprite(ModEntry.Instance.Package.PackageRoot.GetRelativeFile("Sprites/Cards/PatOnTheBack.png")).Sprite,
+			Name = ModEntry.Instance.AnyLocalizations.Bind(["card", "PatOnTheBack", "name"]).Localize
+		});
+	}
+
+	public IReadOnlySet<ICardTraitEntry> GetInnateTraits(State state) => upgrade == Upgrade.A ? new HashSet<ICardTraitEntry>() { HeavyManager.HeavyTrait } : [];
+
+	public override CardData GetData(State state) => new() {
+		cost = 1,
+		artTint = "ffffff"
+	};
+
+	public override List<CardAction> GetActions(State s, Combat c) => [
+		new AStatus {
+			status = ModEntry.Instance.XFactorStatus.Status,
+			statusAmount = 1,
+			targetPlayer = true
+		},
+		new ADrawCard {
+			count = upgrade == Upgrade.B ? 3 : 2
+		}
+	];
 }
 
 internal sealed class ScratchCard : Card, IHasCustomCardTraits, ITyCard
@@ -148,7 +389,7 @@ internal sealed class ScratchCard : Card, IHasCustomCardTraits, ITyCard
 			Meta = new()
 			{
 				deck = ModEntry.Instance.TyDeck.Deck,
-				rarity = Rarity.common,
+				rarity = Rarity.uncommon,
 				upgradesTo = [Upgrade.A, Upgrade.B]
 			},
 			Art = helper.Content.Sprites.RegisterSprite(ModEntry.Instance.Package.PackageRoot.GetRelativeFile("Sprites/Cards/Scratch.png")).Sprite,
@@ -226,7 +467,7 @@ internal sealed class ScurryCard : Card, IHasCustomCardTraits, ITyCard
 			Meta = new()
 			{
 				deck = ModEntry.Instance.TyDeck.Deck,
-				rarity = Rarity.common,
+				rarity = Rarity.uncommon,
 				upgradesTo = [Upgrade.A, Upgrade.B]
 			},
 			Art = helper.Content.Sprites.RegisterSprite(ModEntry.Instance.Package.PackageRoot.GetRelativeFile("Sprites/Cards/Scurry.png")).Sprite,
@@ -235,19 +476,19 @@ internal sealed class ScurryCard : Card, IHasCustomCardTraits, ITyCard
 	}
 
 	public override CardData GetData(State state) => new() {
-		cost = upgrade == Upgrade.B ? 0 : 2,
-		exhaust = upgrade == Upgrade.B,
+		cost = 2,
 		artTint = "ffffff"
 	};
 
-	public IReadOnlySet<ICardTraitEntry> GetInnateTraits(State state) => new HashSet<ICardTraitEntry>() { WildManager.WildTrait };
+	public IReadOnlySet<ICardTraitEntry> GetInnateTraits(State state) => upgrade == Upgrade.A ? 
+		new HashSet<ICardTraitEntry>() { HeavyManager.HeavyTrait, WildManager.WildTrait } : [ WildManager.WildTrait ];
 
 	public override List<CardAction> GetActions(State s, Combat c)
 	{
 		var amt = WildManager.CountWildsInHand(s, c);
 		return upgrade switch
 		{
-			Upgrade.A => [
+			Upgrade.B => [
 				new AVariableHintWild(),
 				new AStatus {
 					status = Status.evade,
@@ -272,257 +513,6 @@ internal sealed class ScurryCard : Card, IHasCustomCardTraits, ITyCard
 			]
 		};
 	}
-}
-
-
-internal sealed class HugsCard : Card, ITyCard
-{
-	public static void Register(IModHelper helper) {
-		helper.Content.Cards.RegisterCard("Hugs", new()
-		{
-			CardType = MethodBase.GetCurrentMethod()!.DeclaringType!,
-			Meta = new()
-			{
-				deck = ModEntry.Instance.TyDeck.Deck,
-				rarity = Rarity.common,
-				upgradesTo = [Upgrade.A, Upgrade.B]
-			},
-			Art = helper.Content.Sprites.RegisterSprite(ModEntry.Instance.Package.PackageRoot.GetRelativeFile("Sprites/Cards/Hugs.png")).Sprite,
-			Name = ModEntry.Instance.AnyLocalizations.Bind(["card", "Hugs", "name"]).Localize
-		});
-	}
-
-	public override CardData GetData(State state) => new() {
-		cost = 1,
-		retain = upgrade == Upgrade.A,
-		exhaust = upgrade != Upgrade.B,
-		artTint = "ffffff"
-	};
-
-	public override List<CardAction> GetActions(State s, Combat c) => [
-		new AStatus
-		{
-			status = ModEntry.Instance.XFactorStatus.Status,
-			statusAmount = 2,
-			targetPlayer = true
-		}
-	];
-}
-
-internal sealed class ZoomiesCard : Card, IHasCustomCardTraits, ITyCard
-{
-	public static void Register(IModHelper helper) {
-		helper.Content.Cards.RegisterCard("Zoomies", new()
-		{
-			CardType = MethodBase.GetCurrentMethod()!.DeclaringType!,
-			Meta = new()
-			{
-				deck = ModEntry.Instance.TyDeck.Deck,
-				rarity = Rarity.common,
-				upgradesTo = [Upgrade.A, Upgrade.B]
-			},
-			Art = helper.Content.Sprites.RegisterSprite(ModEntry.Instance.Package.PackageRoot.GetRelativeFile("Sprites/Cards/Zoomies.png")).Sprite,
-			Name = ModEntry.Instance.AnyLocalizations.Bind(["card", "Zoomies", "name"]).Localize
-		});
-	}
-
-	public override CardData GetData(State state) => new() {
-		cost = upgrade == Upgrade.A ? 0 : 1,
-		flippable = true,
-		artTint = "ffffff"
-	};
-
-	public IReadOnlySet<ICardTraitEntry> GetInnateTraits(State state) => new HashSet<ICardTraitEntry>() { WildManager.WildTrait };
-
-	public override List<CardAction> GetActions(State s, Combat c)
-	{
-		var amt = WildManager.CountWildsInHand(s, c);
-		return upgrade switch
-		{
-			Upgrade.B => [
-				new AVariableHintWild(),
-				new AMove {
-					dir = amt,
-					targetPlayer = true,
-					xHint = 1
-				},
-				new AStatus {
-					status = Status.evade,
-					statusAmount = 1,
-					targetPlayer = true
-				},
-			],
-			_ => [
-				new AVariableHintWild(),
-				new AMove {
-					dir = amt,
-					targetPlayer = true,
-					xHint = 1
-				},
-			]
-		};
-	}
-}
-
-internal sealed class PotShotCard : Card, IHasCustomCardTraits, ITyCard
-{
-	private static Spr CardArt;
-	private static Spr CardArtA;
-	public static void Register(IModHelper helper) {
-		CardArt = helper.Content.Sprites.RegisterSprite(ModEntry.Instance.Package.PackageRoot.GetRelativeFile("Sprites/Cards/PotShot.png")).Sprite;
-		CardArtA = helper.Content.Sprites.RegisterSprite(ModEntry.Instance.Package.PackageRoot.GetRelativeFile("Sprites/Cards/PotShotA.png")).Sprite;
-
-		helper.Content.Cards.RegisterCard("PotShot", new()
-		{
-			CardType = MethodBase.GetCurrentMethod()!.DeclaringType!,
-			Meta = new()
-			{
-				deck = ModEntry.Instance.TyDeck.Deck,
-				rarity = Rarity.common,
-				upgradesTo = [Upgrade.A, Upgrade.B]
-			},
-			Name = ModEntry.Instance.AnyLocalizations.Bind(["card", "PotShot", "name"]).Localize
-		});
-	}
-
-	public override CardData GetData(State state) => new() {
-		cost = 0,
-		exhaust = true,
-		art = upgrade == Upgrade.B ? CardArtA : CardArt,
-		buoyant = true,
-		artTint = "ffffff"
-	};
-
-	public IReadOnlySet<ICardTraitEntry> GetInnateTraits(State state) => upgrade switch {
-		Upgrade.B => [WildManager.WildTrait],
-		_ => new HashSet<ICardTraitEntry>()
-	};
-
-	public override List<CardAction> GetActions(State s, Combat c) => upgrade switch
-	{
-		Upgrade.A => [
-			new AAttack {
-				damage = GetDmg(s, 5)
-			},
-			new AStatus {
-				status = Status.tempShield,
-				statusAmount = 1,
-				targetPlayer = true
-			},
-		],
-		Upgrade.B => [
-			new AVariableHintWild(),
-			new AAttack {
-				damage = GetDmg(s, 4)
-			},
-			new AAttack {
-				damage = GetDmg(s, WildManager.CountWildsInHand(s, c)),
-				xHint = 1
-			},
-		],
-		_ => [
-			new AAttack {
-				damage = GetDmg(s, 4)
-			},
-		]
-	};
-}
-
-internal sealed class StackCard : Card, ITyCard
-{
-	public static void Register(IModHelper helper) {
-		helper.Content.Cards.RegisterCard("Stack", new()
-		{
-			CardType = MethodBase.GetCurrentMethod()!.DeclaringType!,
-			Meta = new()
-			{
-				deck = ModEntry.Instance.TyDeck.Deck,
-				rarity = Rarity.common,
-				upgradesTo = [Upgrade.A, Upgrade.B]
-			},
-			Art = helper.Content.Sprites.RegisterSprite(ModEntry.Instance.Package.PackageRoot.GetRelativeFile("Sprites/Cards/Stack.png")).Sprite,
-			Name = ModEntry.Instance.AnyLocalizations.Bind(["card", "Stack", "name"]).Localize
-		});
-	}
-
-	public override CardData GetData(State state) => new() {
-		cost = upgrade == Upgrade.A ? 0 : 1,
-		artTint = "ffffff"
-	};
-
-	public static int GetX(State s)
-	{
-		return s.ship.Get(Status.shield);
-	}
-
-	public override List<CardAction> GetActions(State s, Combat c)
-	{
-		return upgrade switch
-		{
-			Upgrade.B => [
-				new AStatus {
-					status = Status.shield,
-					statusAmount = 1,
-					targetPlayer = true
-				},
-				new AVariableHint {
-					status = Status.shield
-				},
-				new AStatus {
-					status = Status.tempShield,
-					statusAmount = GetX(s) + 1,
-					targetPlayer = true,
-					xHint = 1
-				},
-			],
-			_ => [
-				new AVariableHint {
-					status = Status.shield
-				},
-				new AStatus {
-					status = Status.tempShield,
-					statusAmount = GetX(s),
-					targetPlayer = true,
-					xHint = 1
-				},
-			]
-		};
-	}
-}
-
-internal sealed class PatOnTheBackCard : Card, ITyCard
-{
-	public static void Register(IModHelper helper) {
-		helper.Content.Cards.RegisterCard("PatOnTheBack", new()
-		{
-			CardType = MethodBase.GetCurrentMethod()!.DeclaringType!,
-			Meta = new()
-			{
-				deck = ModEntry.Instance.TyDeck.Deck,
-				rarity = Rarity.common,
-				upgradesTo = [Upgrade.A, Upgrade.B]
-			},
-			Art = helper.Content.Sprites.RegisterSprite(ModEntry.Instance.Package.PackageRoot.GetRelativeFile("Sprites/Cards/PatOnTheBack.png")).Sprite,
-			Name = ModEntry.Instance.AnyLocalizations.Bind(["card", "PatOnTheBack", "name"]).Localize
-		});
-	}
-
-	public override CardData GetData(State state) => new() {
-		cost = upgrade == Upgrade.B ? 0 : 1,
-		exhaust = upgrade == Upgrade.B,
-		artTint = "ffffff"
-	};
-
-	public override List<CardAction> GetActions(State s, Combat c) => [
-		new AStatus {
-			status = ModEntry.Instance.XFactorStatus.Status,
-			statusAmount = upgrade == Upgrade.B ? 2 : 1,
-			targetPlayer = true
-		},
-		new ADrawCard {
-			count = upgrade == Upgrade.B ? 1 : upgrade == Upgrade.A ? 3 : 2
-		}
-	];
 }
 
 
@@ -761,80 +751,6 @@ internal sealed class PounceCard : Card, IHasCustomCardTraits, ITyCard
 }
 
 
-internal sealed class AugmentDNACard : Card, ITyCard
-{
-	public static void Register(IModHelper helper) {
-		helper.Content.Cards.RegisterCard("AugmentDNA", new()
-		{
-			CardType = MethodBase.GetCurrentMethod()!.DeclaringType!,
-			Meta = new()
-			{
-				deck = ModEntry.Instance.TyDeck.Deck,
-				rarity = Rarity.uncommon,
-				upgradesTo = [Upgrade.A, Upgrade.B]
-			},
-			Art = helper.Content.Sprites.RegisterSprite(ModEntry.Instance.Package.PackageRoot.GetRelativeFile("Sprites/Cards/AugmentDNA.png")).Sprite,
-			Name = ModEntry.Instance.AnyLocalizations.Bind(["card", "AugmentDNA", "name"]).Localize
-		});
-	}
-
-	public override CardData GetData(State state) => new() {
-		cost = 1,
-		exhaust = upgrade == Upgrade.B,
-		description = ModEntry.Instance.Localizations.Localize(["card", "AugmentDNA", "description", upgrade.ToString()]),
-		artTint = "ffffff"
-	};
-
-	public override List<CardAction> GetActions(State s, Combat c) {
-		var amt = WildManager.CountWildsInHand(s, c);
-		return upgrade switch {
-			Upgrade.A => [
-				new ACardSelectImproved
-				{
-					browseAction = new AMakeWild(),
-					browseSource = CardBrowse.Source.Hand,
-					filterUUID = uuid
-				}.ApplyModData(CardBrowseFilterManager.FilterWildKey, false),
-				new ACardSelectImproved
-				{
-					browseAction = new AMakeWild(),
-					browseSource = CardBrowse.Source.Hand,
-					filterUUID = uuid
-				}.ApplyModData(CardBrowseFilterManager.FilterWildKey, false)
-			],
-			Upgrade.B => [
-				new ACardSelectImproved
-				{
-					browseAction = new AMakeWild(),
-					browseSource = CardBrowse.Source.Hand,
-					filterUUID = uuid
-				}.ApplyModData(CardBrowseFilterManager.FilterWildKey, false),
-				new ACardSelectImproved
-				{
-					browseAction = new AMakeWild(),
-					browseSource = CardBrowse.Source.Hand,
-					filterUUID = uuid
-				}.ApplyModData(CardBrowseFilterManager.FilterWildKey, false),
-				new ACardSelectImproved
-				{
-					browseAction = new AMakeWild(),
-					browseSource = CardBrowse.Source.Hand,
-					filterUUID = uuid
-				}.ApplyModData(CardBrowseFilterManager.FilterWildKey, false)
-			],
-			_ => [
-				new ACardSelectImproved
-				{
-					browseAction = new AMakeWild(),
-					browseSource = CardBrowse.Source.Hand,
-					filterUUID = uuid
-				}.ApplyModData(CardBrowseFilterManager.FilterWildKey, false)
-			]
-		};
-	}
-}
-
-
 internal sealed class CurlUpCard : Card, IHasCustomCardTraits, ITyCard
 {
 	public static void Register(IModHelper helper) {
@@ -844,7 +760,7 @@ internal sealed class CurlUpCard : Card, IHasCustomCardTraits, ITyCard
 			Meta = new()
 			{
 				deck = ModEntry.Instance.TyDeck.Deck,
-				rarity = Rarity.uncommon,
+				rarity = Rarity.common,
 				upgradesTo = [Upgrade.A, Upgrade.B]
 			},
 			Art = helper.Content.Sprites.RegisterSprite(ModEntry.Instance.Package.PackageRoot.GetRelativeFile("Sprites/Cards/CurlUp.png")).Sprite,
@@ -853,16 +769,17 @@ internal sealed class CurlUpCard : Card, IHasCustomCardTraits, ITyCard
 	}
 
 	public override CardData GetData(State state) => new() {
-		cost = 2,
+		cost = 1,
 		artTint = "ffffff"
 	};
 
-	public IReadOnlySet<ICardTraitEntry> GetInnateTraits(State state) => new HashSet<ICardTraitEntry>() { WildManager.WildTrait };
+	public IReadOnlySet<ICardTraitEntry> GetInnateTraits(State state) => upgrade == Upgrade.A ?
+		new HashSet<ICardTraitEntry>() { HeavyManager.HeavyTrait, WildManager.WildTrait } : [ WildManager.WildTrait ];
 
 	public override List<CardAction> GetActions(State s, Combat c) {
 		var amt = WildManager.CountWildsInHand(s, c);
 		return upgrade switch {
-			Upgrade.A => [
+			Upgrade.B => [
 				new AVariableHintWild(),
 				new AStatus {
 					status = Status.shield,
@@ -871,30 +788,9 @@ internal sealed class CurlUpCard : Card, IHasCustomCardTraits, ITyCard
 					xHint = 1
 				},
 				new AStatus {
-					status = Status.tempShield,
-					statusAmount = amt,
-					targetPlayer = true,
-					xHint = 1
-				},
-				new AStatus {
-					status = Status.tempShield,
-					statusAmount = 2,
+					status = Status.shield,
+					statusAmount = 1,
 					targetPlayer = true
-				}
-			],
-			Upgrade.B => [
-				new AVariableHintWild(),
-				new AStatus {
-					status = Status.maxShield,
-					statusAmount = amt,
-					targetPlayer = true,
-					xHint = 1
-				},
-				new AStatus {
-					status = Status.tempShield,
-					statusAmount = amt,
-					targetPlayer = true,
-					xHint = 1
 				}
 			],
 			_ => [
@@ -904,13 +800,68 @@ internal sealed class CurlUpCard : Card, IHasCustomCardTraits, ITyCard
 					statusAmount = amt,
 					targetPlayer = true,
 					xHint = 1
-				},
+				}
+			]
+		};
+	}
+}
+
+
+internal sealed class HibernateCard : Card, IHasCustomCardTraits, ITyCard
+{
+	public static void Register(IModHelper helper) {
+		helper.Content.Cards.RegisterCard("Hibernate", new()
+		{
+			CardType = MethodBase.GetCurrentMethod()!.DeclaringType!,
+			Meta = new()
+			{
+				deck = ModEntry.Instance.TyDeck.Deck,
+				rarity = Rarity.uncommon,
+				upgradesTo = [Upgrade.A, Upgrade.B]
+			},
+			Art = helper.Content.Sprites.RegisterSprite(ModEntry.Instance.Package.PackageRoot.GetRelativeFile("Sprites/Cards/Hibernate.png")).Sprite,
+			Name = ModEntry.Instance.AnyLocalizations.Bind(["card", "Hibernate", "name"]).Localize
+		});
+	}
+
+	public override CardData GetData(State state) => new() {
+		cost = 1,
+		infinite = upgrade == Upgrade.A,
+		artTint = "ffffff"
+	};
+
+	public IReadOnlySet<ICardTraitEntry> GetInnateTraits(State state) => upgrade == Upgrade.A ? 
+		new HashSet<ICardTraitEntry>() { HeavyManager.HeavyTrait, WildManager.WildTrait } : [ WildManager.WildTrait ];
+
+	public override List<CardAction> GetActions(State s, Combat c) {
+		var amt = WildManager.CountWildsInHand(s, c);
+		return upgrade switch
+		{
+			Upgrade.B => [
+				new AVariableHintWild(),
 				new AStatus {
-					status = Status.tempShield,
+					status = Status.evade,
 					statusAmount = amt,
 					targetPlayer = true,
 					xHint = 1
-				}
+				},
+				new AStatus {
+					status = Status.shield,
+					statusAmount = amt,
+					targetPlayer = true,
+					xHint = 1
+				},
+				new AEndTurn()
+			],
+			_ => [
+				new AVariableHintWild(),
+				new AStatus {
+					status = Status.evade,
+					statusAmount = amt,
+					targetPlayer = true,
+					xHint = 1
+				},
+				new AEndTurn()
 			]
 		};
 	}
@@ -1034,32 +985,18 @@ internal sealed class ExtremeMeasuresCard : Card, ITyCard
 	}
 
 	public override CardData GetData(State state) => new() {
-		cost = upgrade == Upgrade.A ? 1 : 2,
+		cost = upgrade == Upgrade.B ? 3 : upgrade == Upgrade.A ? 1 : 2,
 		exhaust = true,
 		artTint = "ffffff"
 	};
 
-	public override List<CardAction> GetActions(State s, Combat c) => upgrade switch {
-		Upgrade.B => [
-			new AStatus {
-				status = ModEntry.Instance.ExtremeMeasuresStatus.Status,
-				statusAmount = 1,
-				targetPlayer = true
-			},
-			new AStatus {
-				status = ModEntry.Instance.XFactorStatus.Status,
-				statusAmount = 2,
-				targetPlayer = true
-			}
-		],
-		_ => [
-			new AStatus {
-				status = ModEntry.Instance.ExtremeMeasuresStatus.Status,
-				statusAmount = 1,
-				targetPlayer = true
-			},
-		]
-	};
+	public override List<CardAction> GetActions(State s, Combat c) => [
+		new AStatus {
+			status = ModEntry.Instance.ExtremeMeasuresStatus.Status,
+			statusAmount = upgrade == Upgrade.B ? 2 : 1,
+			targetPlayer = true
+		}
+	];
 }
 
 
@@ -1121,63 +1058,6 @@ internal sealed class DiverterCard : Card, ITyCard
 			},
 		]
 	};
-}
-
-
-internal sealed class HibernateCard : Card, IHasCustomCardTraits, ITyCard
-{
-	public static void Register(IModHelper helper) {
-		helper.Content.Cards.RegisterCard("Hibernate", new()
-		{
-			CardType = MethodBase.GetCurrentMethod()!.DeclaringType!,
-			Meta = new()
-			{
-				deck = ModEntry.Instance.TyDeck.Deck,
-				rarity = Rarity.rare,
-				upgradesTo = [Upgrade.A, Upgrade.B]
-			},
-			Art = helper.Content.Sprites.RegisterSprite(ModEntry.Instance.Package.PackageRoot.GetRelativeFile("Sprites/Cards/Hibernate.png")).Sprite,
-			Name = ModEntry.Instance.AnyLocalizations.Bind(["card", "Hibernate", "name"]).Localize
-		});
-	}
-
-	public override CardData GetData(State state) => new() {
-		cost = upgrade == Upgrade.A ? 0 : 1,
-		artTint = "ffffff"
-	};
-
-	public IReadOnlySet<ICardTraitEntry> GetInnateTraits(State state) => new HashSet<ICardTraitEntry>() { WildManager.WildTrait };
-
-	public override List<CardAction> GetActions(State s, Combat c) {
-		var amt = WildManager.CountWildsInHand(s, c);
-		return upgrade switch {
-			Upgrade.B => [
-				new AVariableHintWild(),
-				new AStatus {
-					status = Status.maxShield,
-					statusAmount = amt,
-					targetPlayer = true,
-					xHint = 1
-				},
-				new AStatus {
-					status = Status.shield,
-					statusAmount = 1,
-					targetPlayer = true
-				},
-				new AEndTurn()
-			],
-			_ => [
-				new AVariableHintWild(),
-				new AStatus {
-					status = Status.maxShield,
-					statusAmount = amt,
-					targetPlayer = true,
-					xHint = 1
-				},
-				new AEndTurn()
-			]
-		};
-	}
 }
 
 
@@ -1254,12 +1134,16 @@ internal sealed class TyExeCard : Card, ITyCard
 		});
 	}
 
-	public override CardData GetData(State state) => new() {
-		cost = upgrade == Upgrade.A ? 0 : 1,
-		exhaust = true,
-		description = ColorlessLoc.GetDesc(state, upgrade == Upgrade.B ? 3 : 2, ModEntry.Instance.TyDeck.Deck),
-		artTint = "ffffff"
-    };
+	public override CardData GetData(State state) {
+		StringBuilder stringBuilder = new(ColorlessLoc.GetDesc(state, upgrade == Upgrade.B ? 3 : 2, ModEntry.Instance.TyDeck.Deck));
+		if (upgrade == Upgrade.B) stringBuilder.Append(ModEntry.Instance.Localizations.Localize(["card", "TyExe", "twice"]));
+		return new() {
+			cost = upgrade == Upgrade.B ? 2 : upgrade == Upgrade.A ? 0 : 1,
+			exhaust = true,
+			description = stringBuilder.ToString(),
+			artTint = "ffffff"
+		};
+    }
 
 	public override List<CardAction> GetActions(State s, Combat c)
     {
@@ -1277,6 +1161,16 @@ internal sealed class TyExeCard : Card, ITyCard
 					inCombat = true,
 					discount = -1,
 					dialogueSelector = ".summonTy"
+				},
+				new ACardOffering
+				{
+					amount = 3,
+					limitDeck = deck,
+					makeAllCardsTemporary = true,
+					overrideUpgradeChances = false,
+					canSkip = false,
+					inCombat = true,
+					discount = -1
 				}
 			],
 			_ => [
@@ -1296,3 +1190,144 @@ internal sealed class TyExeCard : Card, ITyCard
 	}
 }
 
+
+internal sealed class AugmentDNACard : Card, ITyCard
+{
+	public static void Register(IModHelper helper) {
+		helper.Content.Cards.RegisterCard("AugmentDNA", new()
+		{
+			CardType = MethodBase.GetCurrentMethod()!.DeclaringType!,
+			Meta = new()
+			{
+				deck = ModEntry.Instance.TyDeck.Deck,
+				rarity = Rarity.rare,
+				upgradesTo = [Upgrade.A, Upgrade.B]
+			},
+			Art = helper.Content.Sprites.RegisterSprite(ModEntry.Instance.Package.PackageRoot.GetRelativeFile("Sprites/Cards/AugmentDNA.png")).Sprite,
+			Name = ModEntry.Instance.AnyLocalizations.Bind(["card", "AugmentDNA", "name"]).Localize
+		});
+	}
+
+	public override CardData GetData(State state) => new() {
+		cost = 0,
+		exhaust = upgrade == Upgrade.B,
+		description = ModEntry.Instance.Localizations.Localize(["card", "AugmentDNA", "description", upgrade.ToString()]),
+		artTint = "ffffff"
+	};
+
+	public override List<CardAction> GetActions(State s, Combat c) {
+		var amt = WildManager.CountWildsInHand(s, c);
+		return upgrade switch {
+			Upgrade.A => [
+				new ACardSelectImproved
+				{
+					browseAction = new AMakeWild(),
+					browseSource = CardBrowse.Source.Hand,
+					filterUUID = uuid
+				}.ApplyModData(CardBrowseFilterManager.FilterWildKey, false),
+				new ACardSelectImproved
+				{
+					browseAction = new AMakeWild(),
+					browseSource = CardBrowse.Source.Hand,
+					filterUUID = uuid
+				}.ApplyModData(CardBrowseFilterManager.FilterWildKey, false)
+			],
+			Upgrade.B => [
+				new ACardSelectImproved
+				{
+					browseAction = new AMakeWild(),
+					browseSource = CardBrowse.Source.Hand,
+					filterUUID = uuid
+				}.ApplyModData(CardBrowseFilterManager.FilterWildKey, false),
+				new ACardSelectImproved
+				{
+					browseAction = new AMakeWild(),
+					browseSource = CardBrowse.Source.Hand,
+					filterUUID = uuid
+				}.ApplyModData(CardBrowseFilterManager.FilterWildKey, false),
+				new ACardSelectImproved
+				{
+					browseAction = new AMakeWild(),
+					browseSource = CardBrowse.Source.Hand,
+					filterUUID = uuid
+				}.ApplyModData(CardBrowseFilterManager.FilterWildKey, false)
+			],
+			_ => [
+				new ACardSelectImproved
+				{
+					browseAction = new AMakeWild(),
+					browseSource = CardBrowse.Source.Hand,
+					filterUUID = uuid
+				}.ApplyModData(CardBrowseFilterManager.FilterWildKey, false)
+			]
+		};
+	}
+}
+
+
+
+
+
+
+
+internal sealed class StackCard : Card, ITyCard
+{
+	public static void Register(IModHelper helper) {
+		helper.Content.Cards.RegisterCard("Stack", new()
+		{
+			CardType = MethodBase.GetCurrentMethod()!.DeclaringType!,
+			Meta = new()
+			{
+				deck = ModEntry.Instance.TyDeck.Deck,
+				rarity = Rarity.common,
+				upgradesTo = [Upgrade.A, Upgrade.B]
+			},
+			Art = helper.Content.Sprites.RegisterSprite(ModEntry.Instance.Package.PackageRoot.GetRelativeFile("Sprites/Cards/Stack.png")).Sprite,
+			Name = ModEntry.Instance.AnyLocalizations.Bind(["card", "Stack", "name"]).Localize
+		});
+	}
+
+	public override CardData GetData(State state) => new() {
+		cost = upgrade == Upgrade.A ? 0 : 1,
+		artTint = "ffffff"
+	};
+
+	public static int GetX(State s)
+	{
+		return s.ship.Get(Status.shield);
+	}
+
+	public override List<CardAction> GetActions(State s, Combat c)
+	{
+		return upgrade switch
+		{
+			Upgrade.B => [
+				new AStatus {
+					status = Status.shield,
+					statusAmount = 1,
+					targetPlayer = true
+				},
+				new AVariableHint {
+					status = Status.shield
+				},
+				new AStatus {
+					status = Status.tempShield,
+					statusAmount = GetX(s) + 1,
+					targetPlayer = true,
+					xHint = 1
+				},
+			],
+			_ => [
+				new AVariableHint {
+					status = Status.shield
+				},
+				new AStatus {
+					status = Status.tempShield,
+					statusAmount = GetX(s),
+					targetPlayer = true,
+					xHint = 1
+				},
+			]
+		};
+	}
+}

@@ -10,11 +10,19 @@
         "wild": {
             "name": "Wild",
             "description": "Enables wild card synergy."
+        },
+        "heavy": {
+            "name": "Heavy",
+            "nameUsed": "Heavy (inactive)",
+            "description": "This card is not discarded or exhausted at the end of the turn it is drawn."
         }
     },
     "action": {
         "variableHintWild": {
             "description": "X = Wild cards in hand{{Amount}}."
+        },
+        "variableHintWildAndHand": {
+            "description": "X = Wild cards in hand + other cards in hand{{Amount}}."
         },
         "variableHintEnergy": {
             "description": "X = Your energy after paying this card's cost{{Amount}}."
@@ -72,7 +80,7 @@
         },
         "NaturalTalent": {
             "name": "NATURAL TALENT",
-            "description": "Choose a card that is not both <c=cardtrait>wild</c> and <c=cardtrait>buoyant</c> in your deck. It becomes <c=cardtrait>wild</c> and <c=cardtrait>buoyant</c>."
+            "description": "Choose a card that is not <c=cardtrait>buoyant</c> in your deck. It becomes <c=cardtrait>buoyant</c>. All <c=cardtrait>buoyant</c> cards are <c=cardtrait>wild</c>"
         },
         "ChewToy": {
             "name": "CHEW TOY",
@@ -94,7 +102,7 @@
     "duoArtifact": {
         "AimingReticle": {
             "name": "AIMING RETICLE",
-            "description": "All of <c=peri>Peri's</c> card attacks deal bonus damage equal to your <c=status>X FACTOR</c> plus your <c=status>EXTREME MEASURES</c>. <c=downside>All <c=peri>Peri's</c> card attacks deal 1 less damage."
+            "description": "All of <c=peri>Peri's</c> card attacks deal +1 bonus damage for each 2 <c=status>X FACTOR</c> or <c=status>EXTREME MEASURES</c>."
         },
         "SashaSnacks": {
             "name": "SASHA SNACKS",
@@ -123,6 +131,10 @@
         "VirtualPetSim": {
             "name": "VIRTUAL PET SIM",
             "description": "<c=cardtrait>Temporary</c> cards are <c=cardtrait>wild</c>."
+        },
+        "TigersEye": {
+            "name": "TIGER'S EYE",
+            "description": "<c=cardtrait>Gem</c> cards are <c=cardtrait>wild</c>."
         }
     },
     "card": {
@@ -167,10 +179,18 @@
             "name": "Hibernate"
         },
         "Hugs": {
-            "name": "Hugs"
+            "name": "Hugs and Kisses"
         },
         "Instincts": {
             "name": "Instincts"
+        },
+        "PackBond": {
+            "name": "Pack Bond",
+            "description": {
+                "None": "Gain a <c=card>Bite</c> and a <c=card>Curl-Up</c>.",
+                "A": "Gain a <c=card>Bite A</c> and a <c=card>Curl-Up A</c>.",
+                "B": "Gain a <c=card>Bite B</c> and a <c=card>Curl-Up B</c>."
+            }
         },
         "PatOnTheBack": {
             "name": "Pat on the Back"
@@ -183,6 +203,9 @@
         },
         "Predation": {
             "name": "Predation"
+        },
+        "Replicate": {
+            "name": "Replicate"
         },
         "Scratch": {
             "name": "Scratch"
@@ -200,7 +223,8 @@
             "name": "Zoomies"
         },
         "TyExe": {
-            "name": "Ty_Sasha\n.EXE"
+            "name": "Ty_Sasha\n.EXE",
+            "twice": " Twice."
         }
     }
 }

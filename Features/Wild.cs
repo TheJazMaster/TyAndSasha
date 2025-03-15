@@ -13,6 +13,7 @@ using Microsoft.Xna.Framework.Input.Touch;
 using System.Globalization;
 using TheJazMaster.TyAndSasha.Cards;
 using System.Net.Security;
+using TheJazMaster.TyAndSasha.Actions;
 
 namespace TheJazMaster.TyAndSasha.Features;
 #nullable enable
@@ -26,21 +27,11 @@ public class WildManager
 
     public WildManager()
     {
-        // ModEntry.Instance.Harmony.TryPatch(
-		//     logger: ModEntry.Instance.Logger,
-		//     original: AccessTools.DeclaredMethod(typeof(Combat), nameof(Combat.ReturnCardsToDeck)),
-		// 	postfix: new HarmonyMethod(GetType(), nameof(Combat_ReturnCardsToDeck_Postfix))
-		// );
-        // ModEntry.Instance.Harmony.TryPatch(
-		//     logger: ModEntry.Instance.Logger,
-		//     original: AccessTools.DeclaredMethod(typeof(Card), nameof(Card.Render)),
-		// 	transpiler: new HarmonyMethod(GetType(), nameof(Card_Render_Transpiler))
-		// );
-        // ModEntry.Instance.Harmony.TryPatch(
-		//     logger: ModEntry.Instance.Logger,
-		//     original: AccessTools.DeclaredMethod(typeof(Card), nameof(Card.GetAllTooltips)),
-		// 	postfix: new HarmonyMethod(GetType(), nameof(Card_GetAllTooltips_Postfix))
-		// );
+        ModEntry.Instance.Harmony.TryPatch(
+		    logger: ModEntry.Instance.Logger,
+		    original: AccessTools.DeclaredMethod(typeof(Card), nameof(Card.RenderAction)),
+			prefix: new HarmonyMethod(GetType(), nameof(Card_RenderAction_Prefix))
+		);
 
         WildTrait = ModEntry.Instance.Helper.Content.Cards.RegisterTrait("Wild", new() {
             Icon = (_, _) => Instance.WildIcon.Sprite,
@@ -175,4 +166,33 @@ public class WildManager
 
 	// 	__result = ModifyTooltips(__result);
 	// }
+
+    public static bool Card_RenderAction_Prefix(G g, State state, CardAction action, bool dontDraw, int shardAvailable, int stunChargeAvailable, int bubbleJuiceAvailable, ref int __result) {
+        if (action is not AVariableHintWild hint || !hint.alsoHand)
+            return true;
+
+		var copy = Mutil.DeepCopy(hint);
+        copy.alsoHand = false;
+        copy.useRegularHandSprite = true;
+
+		var position = g.Push(rect: new()).rect.xy;
+        int initialX = (int)position.x;
+
+		position.x += Card.RenderAction(g, state, copy, dontDraw, shardAvailable, stunChargeAvailable, bubbleJuiceAvailable);
+        position.x += 1;
+		if (!dontDraw)
+		{
+            Draw.Sprite(StableSpr.icons_plus, position.x, position.y, color: action.disabled ? Colors.disabledIconTint : Colors.textMain);
+        }
+        position.x += 8;
+        if (!dontDraw) {
+			Draw.Sprite(ModEntry.Instance.WildHandIcon.Sprite, position.x, position.y, color: action.disabled ? Colors.disabledIconTint : Colors.white);
+		}
+		position.x += 8;
+
+		__result = (int)position.x - initialX;
+		g.Pop();
+
+		return false;
+    }
 }

@@ -12,18 +12,21 @@ using TheJazMaster.TyAndSasha.Artifacts;
 using TheJazMaster.TyAndSasha.Cards;
 using TheJazMaster.TyAndSasha.Features;
 
-#nullable enable
 namespace TheJazMaster.TyAndSasha;
 
-public sealed class ModEntry : SimpleMod {
+public sealed class ModEntry : SimpleMod, ITyAndSashaApi.IHook {
     internal static ModEntry Instance { get; private set; } = null!;
+	internal readonly HookManager<ITyAndSashaApi.IHook> HookManager;
+	internal readonly ITyAndSashaApi Api;
 
     internal Harmony Harmony { get; }
 	internal IKokoroApi KokoroApi { get; }
 	internal IMoreDifficultiesApi? MoreDifficultiesApi { get; }
 	internal IDuoArtifactsApi? DuoArtifactsApi { get; }
+	internal ILouisApi? LouisApi { get; }
 
 	internal WildManager WildManager { get; }
+	internal HeavyManager HeavyManager { get; }
 
 
 	internal ILocalizationProvider<IReadOnlyList<string>> AnyLocalizations { get; }
@@ -45,37 +48,40 @@ public sealed class ModEntry : SimpleMod {
     internal ISpriteEntry WildIcon { get; }
 	internal ISpriteEntry WildHandIcon { get; }
 	internal ISpriteEntry EnergyIcon { get; }
+    internal ISpriteEntry HeavyIcon { get; }
+    internal ISpriteEntry HeavyUsedIcon { get; }
 
     internal static IReadOnlyList<Type> StarterCardTypes { get; } = [
 		typeof(TreatCard),
 		typeof(BiteCard),
+
+        typeof(PatOnTheBackCard),
+		typeof(PackBondCard),
 	];
 
 	internal static IReadOnlyList<Type> CommonCardTypes { get; } = [
-		typeof(ScratchCard),
-		typeof(ScurryCard),
 		typeof(HugsCard),
 		typeof(ZoomiesCard),
 		typeof(PotShotCard),
-		typeof(StackCard),
-        typeof(PatOnTheBackCard),
+		typeof(ReplicateCard),
+		typeof(CurlUpCard),
 	];
 
 	internal static IReadOnlyList<Type> UncommonCardTypes { get; } = [
+		typeof(ScratchCard),
+		typeof(ScurryCard),
+		typeof(HibernateCard),
 		typeof(CrossAttackCard),
 		typeof(InstinctsCard),
 		typeof(AdrenalineCard),
 		typeof(PounceCard),
-		typeof(AugmentDNACard),
-		typeof(CurlUpCard),
-		typeof(CompoundCard),
 	];
 
 	internal static IReadOnlyList<Type> RareCardTypes { get; } = [
 		typeof(PredationCard),
 		typeof(ExtremeMeasuresCard),
 		typeof(DiverterCard),
-		typeof(HibernateCard),
+		typeof(AugmentDNACard),
 		typeof(FetchCard),
 	];
 
@@ -105,7 +111,8 @@ public sealed class ModEntry : SimpleMod {
 		typeof(PirateMapArtifact),
 		typeof(FunhouseMirrorArtifact),
 		typeof(DruidismArtifact),
-		typeof(VirtualPetSimArtifact)
+		typeof(VirtualPetSimArtifact),
+		typeof(TigersEyeArtifact)
 	];
 
 	internal static IEnumerable<Type> AllArtifactTypes
@@ -116,9 +123,13 @@ public sealed class ModEntry : SimpleMod {
 	{
 		Instance = this;
 		Harmony = new(package.Manifest.UniqueName);
+		HookManager = new(package.Manifest.UniqueName);
+		Api = new ApiImplementation();
+		
 		MoreDifficultiesApi = helper.ModRegistry.GetApi<IMoreDifficultiesApi>("TheJazMaster.MoreDifficulties");
 		KokoroApi = helper.ModRegistry.GetApi<IKokoroApi>("Shockah.Kokoro")!;
 		DuoArtifactsApi = helper.ModRegistry.GetApi<IDuoArtifactsApi>("Shockah.DuoArtifacts");
+		LouisApi = helper.ModRegistry.GetApi<ILouisApi>("TheJazMaster.Louis");
 
 		AnyLocalizations = new JsonLocalizationProvider(
 			tokenExtractor: new SimpleLocalizationTokenExtractor(),
@@ -129,6 +140,7 @@ public sealed class ModEntry : SimpleMod {
 		);
 
 		WildManager = new WildManager();
+		HeavyManager = new HeavyManager();
 		_ = new CardBrowseFilterManager();
 		_ = new XAffectorManager();
 		_ = new StatusManager();
@@ -175,9 +187,13 @@ public sealed class ModEntry : SimpleMod {
 		});
 
 
+		Api.RegisterHook(this);
+
 		WildIcon = helper.Content.Sprites.RegisterSprite(package.PackageRoot.GetRelativeFile("Sprites/Icons/Wild.png"));
 		WildHandIcon = helper.Content.Sprites.RegisterSprite(package.PackageRoot.GetRelativeFile("Sprites/Icons/WildHand.png"));
 		EnergyIcon = helper.Content.Sprites.RegisterSprite(package.PackageRoot.GetRelativeFile("Sprites/Icons/Energy.png"));
+    	HeavyIcon = helper.Content.Sprites.RegisterSprite(package.PackageRoot.GetRelativeFile("Sprites/Icons/Heavy.png"));
+		HeavyUsedIcon = helper.Content.Sprites.RegisterSprite(package.PackageRoot.GetRelativeFile("Sprites/Icons/HeavyUsed.png"));
 
 
 		TyDeck = helper.Content.Decks.RegisterDeck("TyAndSasha", new()
@@ -191,12 +207,12 @@ public sealed class ModEntry : SimpleMod {
         foreach (var cardType in AllCardTypes)
 			AccessTools.DeclaredMethod(cardType, nameof(ITyCard.Register))?.Invoke(null, [helper]);
 		foreach (var artifactType in AllArtifactTypes)
-			AccessTools.DeclaredMethod(artifactType, nameof(ITyCard.Register))?.Invoke(null, [helper]);
+			AccessTools.DeclaredMethod(artifactType, nameof(ITyArtifact.Register))?.Invoke(null, [helper]);
 
 		MoreDifficultiesApi?.RegisterAltStarters(TyDeck.Deck, new StarterDeck {
             cards = {
                 new PatOnTheBackCard(),
-                new ZoomiesCard()
+                new PackBondCard()
             }
         });
 
@@ -240,20 +256,18 @@ public sealed class ModEntry : SimpleMod {
 			Frames = [TyPortrait.Sprite]
 		});
 
-
 		ICardTraitEntry TemporaryCardTrait = helper.Content.Cards.TemporaryCardTrait;
+		ICardTraitEntry BuoyantCardTrait = helper.Content.Cards.BuoyantCardTrait;
 		helper.Content.Cards.OnGetFinalDynamicCardTraitOverrides += (_, data) => {
 			State state = data.State;
 			if (state.route is Combat combat) {
 				WildManager.ignoreCount = true;
 				if (!data.TraitStates[WildManager.WildTrait].IsActive) {
-					foreach (Artifact item in data.State.EnumerateAllArtifacts()) {
-						if (item is GenomeSplicingArtifact) {
-							foreach (CardAction action in data.Card.GetActions(state, combat)) {
-								if (action is AVariableHint && action is not AVariableHintWild) {
-									data.SetOverride(WildManager.WildTrait, true);
-									break;
-								}
+					if (data.State.EnumerateAllArtifacts().Any(item => item is GenomeSplicingArtifact)) {
+						foreach (CardAction action in data.Card.GetActions(state, combat)) {
+							if (action is AVariableHint) {
+								data.SetOverride(WildManager.WildTrait, true);
+								break;
 							}
 						}
 					}
@@ -265,6 +279,25 @@ public sealed class ModEntry : SimpleMod {
 						}
 					}
 				}
+				if (data.TraitStates[BuoyantCardTrait].IsActive) {
+					foreach (Artifact item in data.State.EnumerateAllArtifacts()) {
+						if (item is NaturalTalentArtifact) {
+							data.SetOverride(WildManager.WildTrait, true);
+						}
+					}
+				}
+				WildManager.ignoreCount = false;
+			}
+		};
+		if (LouisApi != null) helper.Content.Cards.OnGetFinalDynamicCardTraitOverrides += (_, data) => {
+			State state = data.State;
+			if (state.route is Combat combat) {
+				WildManager.ignoreCount = true;
+				if (data.TraitStates[LouisApi.GemTrait].IsActive || data.TraitStates[LouisApi.PreciousGemTrait].IsActive) {
+					if (data.State.EnumerateAllArtifacts().Any(item => item is TigersEyeArtifact)) {
+						data.SetOverride(WildManager.WildTrait, true);
+					}
+				}
 				WildManager.ignoreCount = false;
 			}
 		};
@@ -272,4 +305,37 @@ public sealed class ModEntry : SimpleMod {
 
 	public override object? GetApi(IModManifest requestingMod)
 		=> new ApiImplementation();
+	
+	
+	public int AffectX(ITyAndSashaApi.IHook.IAffectXArgs args) {
+		return args.State.ship.Get(Instance.XFactorStatus.Status) + args.State.ship.Get(Instance.ExtremeMeasuresStatus.Status);
+	}
+
+	public bool ApplyXBonus(ITyAndSashaApi.IHook.IApplyXBonusArgs args) {
+		(CardAction action, int xBonus) = (args.Action, args.Bonus);
+		if (action is AAttack attack) {
+			attack.damage += xBonus;
+		} else if (action is AStatus status) {
+			status.statusAmount += xBonus;
+		} else if (action is ADrawCard draw) {
+			draw.count += xBonus;
+		} else if (action is AEnergy energy) {
+			energy.changeAmount += xBonus;
+		} else if (action is AAddCard add) {
+			add.amount += xBonus;
+		} else if (action is ADiscard discard) {
+			discard.count += xBonus;
+		} else if (action is AHeal heal) {
+			heal.healAmount += xBonus;
+		} else if (action is AHurt hurt) {
+			hurt.hurtAmount += xBonus;
+		} else if (action is AMove move) {
+			if (move.dir > 0) {
+				move.dir += xBonus;
+			} else {
+				move.dir -= xBonus;
+			}
+		}
+		return false;
+	}
 }

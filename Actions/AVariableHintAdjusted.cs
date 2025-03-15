@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using Nickel;
 using TheJazMaster.TyAndSasha.Features;
 
+#nullable disable
 namespace TheJazMaster.TyAndSasha.Actions;
 
 public class AVariableHintAdjusted : AVariableHint

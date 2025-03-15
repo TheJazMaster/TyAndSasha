@@ -40,6 +40,6 @@ namespace TheJazMaster.TyAndSasha.Actions
         }
         public override Icon? GetIcon(State s) => new Icon(StableSpr.icons_drawCard, null, Colors.textMain);
 
-        public override List<Tooltip> GetTooltips(State s) => WildManager.WildTrait.Configuration.Tooltips(s, null).ToList();
+        public override List<Tooltip> GetTooltips(State s) => WildManager.WildTrait.Configuration.Tooltips!(s, null).ToList();
     }
 }
